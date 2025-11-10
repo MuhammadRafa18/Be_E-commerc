@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProdukTypeResource extends JsonResource
+class FavoriteResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,11 +15,11 @@ class ProdukTypeResource extends JsonResource
     public function toArray(Request $request): array
     {
         // return parent::toArray($request);
-         return  [
+       return [
             'id' => $this->id,
-            'image' => $this->image,
-            'type' => $this->whenLoaded('type'),
-             'created_at' => $this->created_at,
+            'user_id' => $this->user_id,
+            'produk' => $this->whenLoaded('produk'),
+            'created_at' => $this->created_at
         ];
     }
 }

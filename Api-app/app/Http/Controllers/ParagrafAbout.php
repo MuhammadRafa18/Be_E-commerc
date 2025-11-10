@@ -39,6 +39,7 @@ class ParagrafAbout extends Controller
             'paragrafabout2' => 'required|string|max:1000',
             'paragrafabout3' => 'required|string|max:1000',
             'paragrafabout4' => 'required|string|max:1000',
+            'paragrafabout5' => 'required|string|max:1000',
         ]);
         if ($validasi->fails()) {
             return response()->json([
@@ -58,6 +59,7 @@ class ParagrafAbout extends Controller
             'paragrafabout2' => $request->paragrafabout2,
             'paragrafabout3' => $request->paragrafabout3,
             'paragrafabout4' => $request->paragrafabout4,
+            'paragrafabout5' => $request->paragrafabout5,
         ]);
         return response()->json([
             'messages' => 'data berhasil ditambahkan',
@@ -84,11 +86,12 @@ class ParagrafAbout extends Controller
     public function update(Request $request, ModelsParagrafAbout $Paragrafabout)
     {
         $validasi = Validator::make($request->all(), [
-            'imageabout' => 'required|image|max:2048',
+            'imageabout' => 'nullable|image|max:2048',
             'paragrafabout1' => 'required|string|max:1000',
             'paragrafabout2' => 'required|string|max:1000',
             'paragrafabout3' => 'required|string|max:1000',
             'paragrafabout4' => 'required|string|max:1000',
+            'paragrafabout5' => 'required|string|max:1000',
         ]);
         if ($validasi->fails()) {
             return response()->json([
@@ -97,17 +100,14 @@ class ParagrafAbout extends Controller
         }
         if ($request->hasFile('imageabout')) {
             $ImageAbout = $request->file('imageabout')->store('imageabouts', 'public');
-        } else {
-            return response()->json([
-                'messages' => 'Gambar Tidak ada'
-            ]);
-        }
+            $Paragrafabout->imageabout = $ImageAbout;
+        } 
         $Paragrafabout->update([
-            'imageabout' => $ImageAbout,
             'paragrafabout1' => $request->paragrafabout1,
             'paragrafabout2' => $request->paragrafabout2,
             'paragrafabout3' => $request->paragrafabout3,
             'paragrafabout4' => $request->paragrafabout4,
+            'paragrafabout5' => $request->paragrafabout5,
         ]);
         return response()->json([
             'messages' => 'data berhasil diupdate',

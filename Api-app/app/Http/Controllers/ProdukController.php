@@ -15,7 +15,9 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        $produk = Produk::get();
+        $produk = Produk::with(['type:id,type', 'category:id,category',])
+        ->latest()
+        ->get();
         if ($produk->count()) {
             return ProdukResource::collection($produk);
         } else {
@@ -83,8 +85,9 @@ class ProdukController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Produk $produk)
+    public function show($id)
     {
+        $produk =  Produk::with(['type:id,type', 'category:id,category',])->find($id);
         return new ProdukResource($produk);
     }
 
@@ -99,8 +102,8 @@ class ProdukController extends Controller
     public function update(Request $request, Produk $produk)
     {
         $validasi = Validator::make($request->all(), [
-            'imageproduk' => 'required|image|max:2048',
-            'imagebanner' => 'required|image|max:2048',
+            'imageproduk' => 'nullable|image|max:2048',
+            'imagebanner' => 'nullable|image|max:2048',
             'title' => 'required|string|max:50',
             'type_id' => 'required',
             'category_id' => 'required',
@@ -117,17 +120,17 @@ class ProdukController extends Controller
                 'error' => $validasi->messages(),
             ], 422);
         }
-        if ($request->hasFile('imageproduk') && $request->hasFile('imagebanner')) {
+        if ($request->hasFile('imageproduk')) {
             $Imageproduk = $request->file('imageproduk')->store('imageproduks', 'public');
-            $Imagebanner = $request->file('imagebanner')->store('imagebanners', 'public');
-        } else {
-            return response()->json([
-                'messages' => 'Gambar Tidak ada'
-            ]);
+            $produk->imageproduk = $Imageproduk;
+
         }
+        if($request->hasFile('imagebanner')){
+            $Imagebanner = $request->file('imagebanner')->store('imagebanners', 'public');
+            $produk->imagebanner = $Imagebanner;
+           
+        } 
         $produk->update([
-            'imageproduk' => $Imageproduk,
-            'imagebanner' => $Imagebanner,
             'title' => $request->title,
             'type_id' => $request->type_id,
             'category_id' => $request->category_id,

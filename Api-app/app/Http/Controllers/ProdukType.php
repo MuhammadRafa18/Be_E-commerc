@@ -15,7 +15,7 @@ class ProdukType extends Controller
      */
     public function index()
     {
-        $ProdukType = ModelsProdukType::get();
+        $ProdukType = ModelsProdukType::with('type:id,type')->latest()->get();
         if ($ProdukType->count()) {
             return ProdukTypeResource::collection($ProdukType);
         } else {
@@ -62,9 +62,10 @@ class ProdukType extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ModelsProdukType $ProdukType)
+    public function show($id)
     {
-        return new ProdukResource($ProdukType);
+        $ProdukType =  ModelsProdukType::with('type:id,type')->find($id);
+        return new ProdukTypeResource($ProdukType);
     }
 
     /**
@@ -78,7 +79,7 @@ class ProdukType extends Controller
     public function update(Request $request, ModelsProdukType $ProdukType)
     { {
             $validasi = Validator::make($request->all(), [
-                'image' => 'required|image|max:2048',
+                'image' => 'nullable|image|max:2048',
                 'type_id' => 'required',
             ]);
             if ($validasi->fails()) {
@@ -88,13 +89,9 @@ class ProdukType extends Controller
             }
             if ($request->hasFile('image')) {
                 $ImageProdukType = $request->file('image')->store('images', 'public');
-            } else {
-                return response()->json([
-                    'messages' => 'Gambar Tidak ada'
-                ]);
-            }
+                $ProdukType->image = $ImageProdukType; 
+            } 
             $ProdukType->update([
-                'image' => $ImageProdukType,
                 'type_id' => $request->type_id,
             ]);
             return response()->json([

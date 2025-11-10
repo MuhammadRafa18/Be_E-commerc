@@ -22,6 +22,7 @@ class ParagrafAboutResource extends JsonResource
             'paragrafabout2' => $this->paragrafabout2,
             'paragrafabout3' => $this->paragrafabout3,
             'paragrafabout4' => $this->paragrafabout4,
+            'paragrafabout5' => $this->paragrafabout5,
              'created_at' => $this->created_at,
         ];
     }

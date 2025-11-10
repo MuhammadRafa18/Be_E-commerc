@@ -84,7 +84,7 @@ class VisiMisi extends Controller
     public function update(Request $request, ModelsVisiMisi $Visimisi)
      {
         $validasi = Validator::make($request->all(), [
-            'image' => 'required|image|max:2048',
+            'image' => 'nullable|image|max:2048',
             'visimisi1' => 'required|string|max:1000',
             'visimisi2' => 'required|string|max:1000',
             'visimisi3' => 'required|string|max:1000',
@@ -97,13 +97,9 @@ class VisiMisi extends Controller
         }
         if ($request->hasFile('image')) {
             $ImageVisi = $request->file('image')->store('imagevisi', 'public');
-        } else {
-            return response()->json([
-                'messages' => 'Gambar Tidak ada'
-            ]);
+            $Visimisi->image = $ImageVisi;
         }
         $Visimisi->update([
-            'image' => $ImageVisi,
             'visimisi1' => $request->visimisi1,
             'visimisi2' => $request->visimisi2,
             'visimisi3' => $request->visimisi3,

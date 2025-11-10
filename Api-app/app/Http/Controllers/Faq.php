@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\FaqResource;
+use App\Models\Faq as ModelsFaq;
 use Illuminate\Http\Request;
-use App\Http\Resources\BannerResource;
-use App\Models\Banner as ModelsBanner;
 use Illuminate\Support\Facades\Validator;
 
-class Banner extends Controller
+
+class Faq extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $Banner = ModelsBanner::get();
-        if($Banner->count()){
-              return BannerResource::collection($Banner);
+        $Faq = ModelsFaq::get();
+        if($Faq->count()){
+              return FaqResource::collection($Faq);
         }else{
             return response()->json(['message' => 'Data not Found'], 401);
         }
@@ -33,35 +34,29 @@ class Banner extends Controller
     public function store(Request $request)
      {
         $validasi = Validator::make($request->all(), [
-            'banner' => 'required|image|max:2048',
+            'judul' => 'required|string|max:150',
         ]);
         if ($validasi->fails()) {
             return response()->json([
                 'error' => $validasi->messages(),
             ], 422);
         }
-        if ($request->hasFile('banner')) {
-            $Imagebanner = $request->file('banner')->store('banners', 'public');
-        } else {
-            return response()->json([
-                'messages' => 'Gambar Tidak ada'
-            ]);
-        }
-        $Banner = ModelsBanner::create([
-            'banner' => $Imagebanner,
+       
+        $Faq = ModelsFaq::create([
+            'judul' => $request->judul,
         ]);
         return response()->json([
             'messages' => 'data berhasil ditambahkan',
-            'data' => new BannerResource($Banner)
+            'data' => new FaqResource($Faq)
         ], 200);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(ModelsBanner $Banner)
+    public function show(ModelsFaq $Faq)
     {
-        return new BannerResource($Banner);
+        return new FaqResource($Faq);
     }
 
     /**
@@ -72,41 +67,33 @@ class Banner extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ModelsBanner $Banner)
-    {
-    
+    public function update(Request $request, ModelsFaq $Faq)
+      {
         $validasi = Validator::make($request->all(), [
-            'banner' => 'nullable|image|max:2048',
+            'judul' => 'required|string|max:150',
         ]);
         if ($validasi->fails()) {
             return response()->json([
                 'error' => $validasi->messages(),
             ], 422);
         }
-        if ($request->hasFile('banner')) {
-            $Imagebanner = $request->file('banner')->store('banners', 'public');
-             $Banner->update([
-            'banner' => $Imagebanner,
-        ]);
-        }else{
-             $Banner->update([
-            'banner' => $Banner->banner,
-        ]);
-        }
-
        
+        $Faq->update([
+            'judul' => $request->judul,
+        ]);
         return response()->json([
             'messages' => 'data berhasil diupdate',
-            'data' => new BannerResource($Banner)
+            'data' => new FaqResource($Faq)
         ], 200);
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ModelsBanner $Banner)
+    public function destroy(ModelsFaq $Faq)
     {
-         $Banner->delete();
+         $Faq->delete();
         return response()->json([
             'messages' => 'data berhasil dihapus',
         ],200);

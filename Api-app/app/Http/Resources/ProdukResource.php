@@ -20,8 +20,8 @@ class ProdukResource extends JsonResource
             'imageproduk' => $this->imageproduk,
             'imagebanner' => $this->imagebanner,
             'title' => $this->title,
-            'type_id' => $this->type_id,
-            'category_id' => $this->category_id,
+            'type' => $this->whenLoaded('type'),
+            'category' => $this->whenLoaded('category'),
             'price' => $this->price,
             'size' => $this->size,
             'rating' => $this->rating,
@@ -29,11 +29,9 @@ class ProdukResource extends JsonResource
             'description' => $this->description,
             'useproduk' => $this->useproduk,
             'ingredient' => $this->ingredient,
-             'created_at' => $this->created_at,
+            'created_at' => $this->created_at,
 
-             
+
         ];
-  
-       
     }
 }

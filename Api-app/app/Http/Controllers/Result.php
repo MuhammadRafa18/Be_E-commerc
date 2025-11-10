@@ -75,7 +75,7 @@ class Result extends Controller
     public function update(Request $request, ModelsResult $Result)
     {
         $validasi = Validator::make($request->all(), [
-            'result' => 'required|image|max:2048',
+            'result' => 'nullable|image|max:2048',
         ]);
         if ($validasi->fails()) {
             return response()->json([
@@ -84,14 +84,15 @@ class Result extends Controller
         }
         if ($request->hasFile('result')) {
             $ImageResult = $request->file('result')->store('results', 'public');
-        } else {
-            return response()->json([
-                'messages' => 'Gambar Tidak ada'
-            ]);
-        }
-        $Result->update([
+             $Result->update([
             'result' => $ImageResult,
         ]);
+        } else {
+            $Result->update([
+            'result' => $Result->result,
+        ]);
+        }
+       
         return response()->json([
             'messages' => 'data berhasil diupdate',
             'data' => new ResultResource($Result)
