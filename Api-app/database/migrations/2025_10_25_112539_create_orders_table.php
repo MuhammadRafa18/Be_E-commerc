@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('diskon');
             $table->integer('ongkir');
             $table->integer('total');
-            $table->string('status');
+            $table->string('status')->default('Pending');
             $table->string('trackingNumber')->nullable();
             $table->timestamps();
 

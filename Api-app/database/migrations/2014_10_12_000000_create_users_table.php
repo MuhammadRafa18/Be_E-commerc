@@ -17,6 +17,18 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('phone')->nullable();
+            $table->timestamp('phone_verified_at')->nullable();
+            $table->string('phone_otp')->nullable();
+            $table->timestamp('phone_otp_expires_at')->nullable();
+
+            $table->enum('role', ['user', 'admin', 'super_admin'])
+                ->default('user');
+            $table->enum('status', ['pending', 'active', 'suspended'])
+                ->default('pending');
+
+            $table->string('profile_image')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });

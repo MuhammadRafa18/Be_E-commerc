@@ -2,23 +2,59 @@
 
 namespace App\Models;
 
-use App\Models\Type;
+
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 
 class Produk extends Model
 {
     use HasFactory;
-     public function category()
+    protected $table = "produks";
+    protected $fillable = [
+        'imageproduk',
+        'imagebanner',
+        'title',
+        'type_id',
+        'category_id',
+        'price',
+        'size',
+        'rating',
+        'stok',
+        'description',
+        'useproduk',
+        'ingredient'
+    ];
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($produk) {
+            if (empty($produk->slug) && !empty($produk->title)) {
+                $produk->slug = Str::slug($produk->title);
+            }
+        });
+        static::updating(function ($produk) {
+            if (!empty($produk->title)) {
+                $produk->slug = Str::slug($produk->title);
+            }
+        });
+    }
+    public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function type()
+    public function skin_type()
     {
-        return $this->belongsTo(Type::class);
+        return $this->belongsToMany(SkinType::class);
     }
-    protected $table = "produks";
-    protected $fillable = ['imageproduk','imagebanner','title','type_id','category_id','price','size','rating','stok','description','useproduk','ingredient'];
+    public function  favorite()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+     public function cart() {
+        return $this->hasMany(Cart::class);
+    }
 }

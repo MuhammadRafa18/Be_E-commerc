@@ -13,9 +13,9 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, $roles): Response
     {
-       $user = $request->user();
+        $user = $request->user();
 
         // Token tidak dikirim → 401
         if (!$user) {
@@ -23,7 +23,7 @@ class RoleMiddleware
         }
 
         // Role tidak cocok → 403
-        if ($user->role !== 'SuperAdmin') {
+        if (!in_array($user->role, $roles)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

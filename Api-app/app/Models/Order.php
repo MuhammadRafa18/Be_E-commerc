@@ -12,15 +12,22 @@ class Order extends Model
 {
     use HasFactory;
     protected $table = 'orders';
-    protected $fillable = ['user_id','addres_id','produk_id','qty','diskon','ongkir','total','status','trackingNumber'];
+    protected $fillable = ['user_id', 'addres_id', 'produk_id', 'qty', 'diskon', 'ongkir', 'total', 'status', 'trackingNumber'];
 
-    public function data_user(){
-        return $this->belongsTo(DataUser::class);
+    public function data_user()
+    {
+        return $this->belongsTo(User::class);
     }
-    public function addres(){
+    public function addres()
+    {
         return $this->belongsTo(Addres::class);
     }
-    public function produk(){
+    public function produk()
+    {
         return $this->belongsTo(Produk::class);
+    }
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
     }
 }

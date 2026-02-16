@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('provinci');
             $table->string('city');
             $table->timestamps();
-
             $table->foreign('user_id')->references('id')->on('data_users')->onDelete('cascade');
 
         });

@@ -18,7 +18,7 @@ class FavoriteResource extends JsonResource
        return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'produk' => $this->whenLoaded('produk'),
+            'produk' => $this->whenLoaded('produk', fn () => new ProdukResource($this->produk)),
             'created_at' => $this->created_at
         ];
     }
