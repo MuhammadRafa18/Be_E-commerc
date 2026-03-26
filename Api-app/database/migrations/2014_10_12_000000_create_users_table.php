@@ -24,8 +24,6 @@ return new class extends Migration
 
             $table->enum('role', ['user', 'admin', 'super_admin'])
                 ->default('user');
-            $table->enum('status', ['pending', 'active', 'suspended'])
-                ->default('pending');
 
             $table->string('profile_image')->nullable();
 

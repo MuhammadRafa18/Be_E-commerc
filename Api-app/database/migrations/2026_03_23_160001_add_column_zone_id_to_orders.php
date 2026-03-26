@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('user_admins', function (Blueprint $table) {
-            $table->string('username');
+        Schema::table('orders', function (Blueprint $table) {
+            $table->unsignedBigInteger('zones_region_id')->nullable()->after('address_id');
+
+            $table->foreign('zones_region_id')->references('id')->on('zones_region')->nullOnDelete('cascade');
         });
     }
 
@@ -21,8 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('user_admins', function (Blueprint $table) {
-             $table->string('username');
+        Schema::table('orders', function (Blueprint $table) {
+            //
         });
     }
 };

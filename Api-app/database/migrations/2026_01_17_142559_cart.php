@@ -13,9 +13,10 @@ return new class extends Migration
     {
           Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->constrained('data_users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id')->constrained('users')->onDelete('cascade');
             $table->unsignedBigInteger('produk_id')->constrained('produks')->onDelete('cascade');
             $table->integer('qty');
+            $table->boolean('is_selected')->default(true);
             $table->timestamps();
 
              $table->unique(['user_id', 'produk_id']);

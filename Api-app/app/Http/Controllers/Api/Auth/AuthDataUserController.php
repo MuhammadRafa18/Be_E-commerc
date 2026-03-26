@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\DataUser;
+
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+
 
 class AuthDataUserController extends Controller
 {
@@ -25,7 +25,7 @@ class AuthDataUserController extends Controller
             return response()->json(['error' => 'Email atau password salah'], 401);
         }
         if (!$user->hasVerifiedEmail()) {
-            abort(403, 'Email not verified');
+            return response()->json(['error' => 'Vertivikasi Email Terlebih Dahulu'], 403);
         }
 
         $user->tokens()->delete();
@@ -34,7 +34,7 @@ class AuthDataUserController extends Controller
             'message' => 'Login sukses',
             'token' => $token,
             'user' => $user
-        ]);
+        ],200);
     }
     public function logout(Request $request)
     {
@@ -42,6 +42,6 @@ class AuthDataUserController extends Controller
 
         return response()->json([
             'message' => 'Logout sukses'
-        ]);
+        ],200);
     }
 }

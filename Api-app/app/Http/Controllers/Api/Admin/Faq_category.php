@@ -16,14 +16,13 @@ class Faq_category extends Controller
      */
     public function index()
     {
-        $Faq_category = ModelsFaq::orderBy('created_at','desc')->get();
-        if ($Faq_category->count()) {
-            return FaqCategoryResource::collection($Faq_category);
-        } else {
+        $Faq_category = ModelsFaq::orderBy('created_at', 'desc')->get();
+        if ($Faq_category->isEmpty()) {
             return response()->json([
-                'message' => 'Category Faq not Found',
+                'message' => 'Faq Category not Found',
             ], 404);
         }
+        return FaqCategoryResource::collection($Faq_category);
     }
 
     /**
@@ -49,7 +48,7 @@ class Faq_category extends Controller
             'category' => $request->category,
         ]);
         return response()->json([
-            'messages' => 'data berhasil ditambahkan',
+            'messages' => 'Faq Category berhasil ditambahkan',
             'data' => new FaqCategoryResource($Faq_category)
         ], 201);
     }
@@ -59,13 +58,9 @@ class Faq_category extends Controller
      */
     public function show(ModelsFaq $Faq_category)
     {
-        if (!$Faq_category) {
-            return response()->json([
-                'message' => 'Category not Found',
-            ], 404);
-        } else {
-            return new FaqCategoryResource($Faq_category);
-        }
+        return response()->json([
+            'data' => new FaqCategoryResource($Faq_category)
+        ],200);
     }
 
     /**
@@ -91,9 +86,9 @@ class Faq_category extends Controller
             'category' => $request->category,
         ]);
         return response()->json([
-            'messages' => 'data berhasil diupdate',
+            'messages' => 'Faq Category berhasil diupdate',
             'data' => new FaqCategoryResource($Faq_category)
-        ], 201);
+        ], 200);
     }
 
 
@@ -104,7 +99,7 @@ class Faq_category extends Controller
     {
         $Faq_category->delete();
         return response()->json([
-            'messages' => 'data berhasil dihapus',
-        ], 201);
+            'messages' => 'Faq Category berhasil dihapus',
+        ], 200);
     }
 }

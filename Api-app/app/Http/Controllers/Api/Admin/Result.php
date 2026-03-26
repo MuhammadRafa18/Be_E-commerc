@@ -16,24 +16,23 @@ class Result extends Controller
      */
     public function index()
     {
-        $Result = ModelsResult::orderBy('created_at','desc')->get();
-        if($Result->count()){
-              return ResultResource::collection($Result);
-        }else{
-            return response()->json(['message' => 'Data not Found'], 404);
+        $Result = ModelsResult::orderBy('created_at', 'desc')->get();
+        if ($Result->isEmpty()) {
+            return response()->json(['message' => 'Result not Found'], 404);
         }
+        return ResultResource::collection($Result);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-   
+
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-     {
+    {
         $validasi = Validator::make($request->all(), [
             'result' => 'required|image|max:2048',
         ]);
@@ -63,13 +62,15 @@ class Result extends Controller
      */
     public function show(ModelsResult $Result)
     {
-        return new ResultResource($Result);
+        return response()->json([
+            'data' => new ResultResource($Result)
+        ], 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-   
+
 
     /**
      * Update the specified resource in storage.
@@ -89,15 +90,15 @@ class Result extends Controller
                 Storage::disk('public')->delete($Result->result);
             }
             $ImageResult = $request->file('result')->store('results', 'public');
-             $Result->update([
-            'result' => $ImageResult,
-        ]);
-        } 
-       
+            $Result->update([
+                'result' => $ImageResult,
+            ]);
+        }
+
         return response()->json([
             'messages' => 'data berhasil diupdate',
             'data' => new ResultResource($Result)
-        ], 201);
+        ], 200);
     }
 
     /**
@@ -105,12 +106,12 @@ class Result extends Controller
      */
     public function destroy(ModelsResult $Result)
     {
-        if($Result->result && Storage::disk('public')->exists($Result->result)){
+        if ($Result->result && Storage::disk('public')->exists($Result->result)) {
             Storage::disk('public')->delete($Result->result);
         }
         $Result->delete();
         return response()->json([
             'messages' => 'data berhasil dihapus',
-        ],201);
+        ], 200);
     }
 }

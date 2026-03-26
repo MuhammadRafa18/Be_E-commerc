@@ -12,7 +12,7 @@ class Favorite extends Model
     protected $fillable = ['user_id','produk_id'];
 
     public function data_user()  {
-        return $this->belongsTo(DataUser::class);
+        return $this->belongsTo(User::class);
     }
     public function produk()  {
         return $this->belongsTo(Produk::class);

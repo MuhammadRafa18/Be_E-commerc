@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\About as ResourcesAbout;
 use App\Models\About as ModelsAbout;
-use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -14,18 +13,13 @@ class About extends Controller
 {
     public function index()
     {
-        $about = ModelsAbout::orderBy('created_at','desc')->get();
-        if (empty($about)) {
+        $about = ModelsAbout::orderBy('created_at', 'desc')->get();
+        if ($about->isEmpty()) {
             return response()->json([
-                'success' => false,
-                'message' => 'Data About Belum ada'
+                'message' => 'About Not Found'
             ], 404);
-        } else {
-            return response()->json([
-                'success' => true,
-                'message' => ResourcesAbout::collection($about)
-            ], 200);
         }
+        return  ResourcesAbout::collection($about);
     }
     public function store(Request $request)
     {
@@ -50,12 +44,11 @@ class About extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
                 'message' => 'Validasi gagal',
                 'errors'  => $validator->errors()
             ], 422);
         }
-      
+
         $data = $validator->validate();
 
         if ($request->hasFile('image')) {
@@ -75,7 +68,6 @@ class About extends Controller
         $about = ModelsAbout::create($data);
 
         return response()->json([
-            'success' => true,
             'message' => 'About berhasil dibuat',
             'data' => new ResourcesAbout($about)
         ], 201);
@@ -83,20 +75,10 @@ class About extends Controller
 
     public function show($slug)
     {
-        $about = ModelsAbout::where('slug', $slug)
-            ->firstOrFail();
-
-        if (empty($about)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data About Belum ada'
-            ], 404);
-        } else {
-            return response()->json([
-                'success' => true,
-                'data'    => new ResourcesAbout($about)
-            ], 200);
-        }
+        $about = ModelsAbout::where('slug', $slug)->firstOrFail();
+        return response()->json([
+            'data'    => new ResourcesAbout($about)
+        ], 200);
     }
 
     public function update(Request $request, ModelsAbout $about)
@@ -116,7 +98,6 @@ class About extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
                 'message' => 'Validasi gagal',
                 'errors'  => $validator->errors()
             ], 422);
@@ -152,10 +133,9 @@ class About extends Controller
 
         $about->update($data);
         return response()->json([
-            'success' => true,
             'message' => 'About berhasil diupadte',
             'data' => new ResourcesAbout($about)
-        ], 201);
+        ], 200);
     }
 
     public function destroy(ModelsAbout $about)
@@ -163,7 +143,7 @@ class About extends Controller
         if (!empty($about->image) && Storage::disk('public')->exists($about->image)) {
             Storage::disk('public')->delete($about->image);
         }
-          if (!empty($about->image_visi) && Storage::disk('public')->exists($about->image_visi)) {
+        if (!empty($about->image_visi) && Storage::disk('public')->exists($about->image_visi)) {
             Storage::disk('public')->delete($about->image_visi);
         }
         if (!empty($about->icon) && is_array($about->icon)) {
@@ -176,7 +156,6 @@ class About extends Controller
 
         $about->delete();
         return response()->json([
-            'success' => true,
             'message' => 'About berhasil dihapus'
         ], 200);
     }

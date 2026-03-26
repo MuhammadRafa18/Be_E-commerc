@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserAdminResource extends JsonResource
+class ZoneRegion extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,12 +16,11 @@ class UserAdminResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-          'id' => $this->id,
-          'email' => $this->email,
-          'password' => $this->password,
-          'role' => $this->role,
-            'created_at' => $this->created_at,
-
+            'id' => $this->id,
+            'shipping_zone' => $this->whenLoaded('shipping_zone'),
+            'region' => $this->region,
+            'estimasi_min_day' => $this->estimasi_min_day,
+            'estimasi_max_day' => $this->estimasi_max_day,
         ];
     }
 }

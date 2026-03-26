@@ -19,11 +19,10 @@ class AddresController extends Controller
         $addre = Addres::where('user_id', $user->id)->get();
         if ($addre->isEmpty()) {
             return response()->json([
-                'messages' => "Data Not Found"
+                'messages' => "Address Not Found"
             ], 404);
-        } else {
-            return AddresResource::collection($addre);
         }
+        return AddresResource::collection($addre);
     }
 
     /**
@@ -36,24 +35,35 @@ class AddresController extends Controller
      */
     public function store(Request $request)
     {
-        $data =  $request->validate([
+        $validator = Validator::make($request->all(), [
             'fullname' => 'required|string|max:255',
             'streetname' => 'required|string|max:255',
             'place' => 'required|string|max:255',
             'provinci' => 'required|string|max:255',
             'city' => 'required|string|max:255'
         ]);
-        $data['user_id'] = $request->user()->id;
-     
-        if (Addres::where('user_id', $request->user()->id)->count() >= 3) {
-            return response()->json(['message' => 'Maksimal 3 alamat'], 403);
+        $validator->after(function ($validator) use ($request) {
+            $count = Addres::where('user_id', $request->user()->id)->count();
+
+            if ($count >= 3) {
+                $validator->errors()->add('address', 'Maksimal 3 alamat');
+            }
+        });
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        $data = $validator->validated();
+        $data['user_id'] = $request->user()->id;
 
         $addre = Addres::create($data);
         return response()->json([
             'messages' => 'Data Berhasil ditambahkan',
             'data' => new AddresResource($addre)
-        ], 200);
+        ], 201);
     }
 
 
@@ -67,7 +77,7 @@ class AddresController extends Controller
         $address = Addres::where('id', $id)
             ->where('user_id', $user->id)
             ->firstOrFail();
-        return new AddresResource($address);
+        return response()->json(['data' => new AddresResource($address)], 200);
     }
 
     /**
@@ -78,7 +88,7 @@ class AddresController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request,$id)
+    public function update(Request $request, $id)
     {
         $data = $request->validate([
             'fullname' => 'sometimes|string|max:255',
@@ -87,12 +97,12 @@ class AddresController extends Controller
             'provinci' => 'sometimes|string|max:255',
             'city' => 'sometimes|string|max:255'
         ]);
-        $addres = Addres::where('id',$id)->where('user_id', $request->user()->id)->firstOrFail();
+        $addres = Addres::where('id', $id)->where('user_id', $request->user()->id)->firstOrFail();
         $addres->update($data);
         return response()->json([
             'messages' => 'Alamat Berhasil diupdate',
             'data' => new AddresResource($addres)
-        ], 201);
+        ], 200);
     }
 
     /**
@@ -105,6 +115,6 @@ class AddresController extends Controller
         $addres->delete();
         return response()->json([
             'messages' => 'Alamat berhasil dihapus',
-        ], 201);
+        ], 200);
     }
 }

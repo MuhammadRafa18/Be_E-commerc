@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\Auth;
 
 use App\Models\User;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class ResendVerificationController extends Controller
@@ -27,6 +28,6 @@ class ResendVerificationController extends Controller
 
         return response()->json([
             'message' => 'Email verifikasi dikirim ulang'
-        ]); 
+        ],201); 
     }
 }

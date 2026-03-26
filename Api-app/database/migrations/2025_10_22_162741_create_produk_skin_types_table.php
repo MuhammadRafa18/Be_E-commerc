@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('produk_id');
             $table->timestamps();
 
-            $table->foreign('skin_type_id')->references('id')->on('skin_type')->onDelete('cascade');    
+            $table->foreign('skin_type_id')->references('id')->on('skin_type')->restrictOnDelete('cascade');    
             $table->foreign('produk_id')->references('id')->on('produks')->onDelete('cascade');    
         });
     }

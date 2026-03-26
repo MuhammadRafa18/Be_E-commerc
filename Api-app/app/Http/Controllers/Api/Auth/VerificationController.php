@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\Auth;
 
 use App\Models\User;
-use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+
 
 class VerificationController extends Controller
 {
@@ -31,9 +30,11 @@ class VerificationController extends Controller
 
         // TANDAI VERIFIED
         $user->markEmailAsVerified();
-
+        $user->tokens()->delete();
+        $token = $user->createToken('user-admin-token')->plainTextToken;
         return response()->json([
-            'message' => 'Email berhasil diverifikasi'
-        ]);
+            'message' => 'Email berhasil diverifikasi',
+            'token' =>$token,
+        ],200);
     }
 }

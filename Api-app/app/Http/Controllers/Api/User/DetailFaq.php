@@ -13,22 +13,17 @@ class DetailFaq extends Controller
     public function index()
     {
         $detail_faq = ModelsDetailFaq::with('faq')->orderBy('created_at', 'desc')->get();
-        if (empty($detail_faq)) {
+        if ($detail_faq->isEmpty()) {
             return response()->json([
-                'succes' => true,
                 'messages' => 'Detail Faq not found'
             ], 404);
-        } else {
-            return response()->json([
-                'succes' => true,
-                'data' => ResourcesDetailFaq::collection($detail_faq)
-            ], 200);
         }
+        return ResourcesDetailFaq::collection($detail_faq);
     }
     public function store(Request $request)
     {
 
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'faq_category_id' => 'required|integer|exists:faq_category,id',
             'quest' => 'required|string',
             'answer' => 'required|string',
@@ -43,26 +38,18 @@ class DetailFaq extends Controller
         return response()->json([
             'messages' => 'Data Berhasil Ditambahkan',
             'data' => new ResourcesDetailFaq($detail_faq)
-        ], 200);
+        ], 201);
     }
     public function show($slug)
     {
         $detail_faq = ModelsDetailFaq::with('faq')->where('slug', $slug)->firstOrFail();
-        if (empty($detail_faq)) {
-            return response()->json([
-                'succes' => true,
-                'messages' => 'Detail Faq not found'
-            ], 404);
-        } else {
-            return response()->json([
-                'succes' => true,
-                'data' => new ResourcesDetailFaq($detail_faq)
-            ], 200);
-        }
+        return response()->json([
+            'data' => new ResourcesDetailFaq($detail_faq)
+        ], 200);
     }
     public function update(Request $request, ModelsDetailFaq $detail_faq)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'faq_category_id' => 'sometimes|integer|exists:faq_category,id',
             'quest' => 'sometimes|string',
             'answer' => 'sometimes|string',

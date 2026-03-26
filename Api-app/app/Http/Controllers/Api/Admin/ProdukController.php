@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProdukResource;
+use App\Models\OrderItem;
 use App\Models\Produk;
-use GuzzleHttp\Handler\Proxy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -20,11 +20,10 @@ class ProdukController extends Controller
         $produk = Produk::with(['skin_type', 'category:id,category,slug',])
             ->latest()
             ->get();
-        if ($produk->count()) {
-            return ProdukResource::collection($produk);
-        } else {
-            return response()->json(['messages' => 'Data Not found'], 404);
+        if ($produk->isEmpty()) {
+            return response()->json(['messages' => 'Produk Not found'], 404);
         }
+        return ProdukResource::collection($produk);
     }
 
     /**
@@ -45,11 +44,11 @@ class ProdukController extends Controller
             'skin_type_id'   => 'nullable|array',
             'skin_type_id.*' => 'integer|exists:skin_type,id',
             'price' =>  'required|numeric|min:0',
-            'size' =>   'required|string|max:50',
-            'rating' =>  'required|numeric|between:0,5',
+            'sell_price' =>  'required|numeric|min:0',
+            'size' =>   'required|numeric|min:0',
             'stok' =>   'required|numeric|min:0',
             'description' => 'nullable|string|max:1000',
-            'useproduk' => 'required|string|max:1000',
+            'useproduk' => 'nullable|string|max:1000',
             'ingredient' => 'nullable|string|max:1000',
         ]);
         if ($validasi->fails()) {
@@ -71,8 +70,8 @@ class ProdukController extends Controller
             'title' => $request->title,
             'category_id' => $request->category_id,
             'price' =>  $request->price,
+            'sell_price' =>  $request->sell_price,
             'size' =>   $request->size,
-            'rating' =>  $request->rating,
             'stok' =>   $request->stok,
             'description' => $request->description,
             'useproduk' => $request->useproduk,
@@ -94,7 +93,14 @@ class ProdukController extends Controller
     public function show($slug)
     {
         $produk =  Produk::with(['skin_type', 'category:id,category',])->where('slug', $slug)->firstOrFail();
-        return new ProdukResource($produk);
+        if (!$produk) {
+            return response()->json([
+                'message' => 'Produk Not Found'
+            ], 404);
+        }
+        return response()->json([
+            'data' => new ProdukResource($produk)
+        ], 200);
     }
 
     /**
@@ -115,12 +121,13 @@ class ProdukController extends Controller
             'skin_type_id'   => 'sometimes|nullable|array',
             'skin_type_id.*' => 'integer|exists:skin_type,id',
             'price' =>  'sometimes|required|numeric|min:0',
+            'sell_price' =>  'sometimes|required|numeric|min:0',
             'size' =>   'sometimes|required|string|max:50',
-            'rating' =>  'sometimes|required|numeric|between:0,5',
             'stok' =>   'sometimes|required|numeric|min:0',
             'description' => 'sometimes|required|string|max:1000',
             'useproduk' => 'sometimes|required|string|max:1000',
             'ingredient' => 'sometimes|required|string|max:1000',
+            'is_active' => 'sometimes|boolean'
         ]);
         if ($validasi->fails()) {
             return response()->json([
@@ -145,16 +152,26 @@ class ProdukController extends Controller
             $produk->skin_type()->sync($request->skin_type_id);
         }
         return response()->json([
-            'messages' => 'data berhasil diupdate',
+            'messages' => 'Produk berhasil diupdate',
             'data' => new ProdukResource($produk)
-        ], 201);
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Produk $produk)
+    public function destroy($id)
     {
+        $produk = Produk::findOrFail($id);
+
+        $usedInOrder = OrderItem::where('produk_id', $id)->exists();
+
+        if ($usedInOrder) {
+            return response()->json([
+                'message' => 'Produk tidak bisa dihapus karena sudah ada di order'
+            ], 409);
+        }
+
         if ($produk->imageproduk && Storage::disk('public')->exists($produk->imageproduk)) {
             Storage::disk('public')->delete($produk->imageproduk);
         }
@@ -166,6 +183,6 @@ class ProdukController extends Controller
         return response()->json([
             'message' => 'Data berhasil di hapus',
 
-        ], 201);
+        ], 200);
     }
 }

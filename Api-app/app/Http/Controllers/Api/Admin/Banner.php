@@ -18,11 +18,10 @@ class Banner extends Controller
     public function index()
     {
         $Banner = ModelsBanner::orderBy('created_at','desc')->get();
-        if ($Banner->count()) {
-            return BannerResource::collection($Banner);
-        } else {
-            return response()->json(['message' => 'Data not Found'], 200);
-        }
+        if ($Banner->isEmpty()) {
+          return response()->json(['message' => 'Banner not Found'], 404);
+        } 
+          return BannerResource::collection($Banner);
     }
 
     /**
@@ -54,7 +53,7 @@ class Banner extends Controller
             'banner' => $Imagebanner,
         ]);
         return response()->json([
-            'messages' => 'data berhasil ditambahkan',
+            'messages' => 'Banner berhasil ditambahkan',
             'data' => new BannerResource($Banner)
         ], 201);
     }
@@ -63,7 +62,11 @@ class Banner extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-
+    public function show(Banner $banner){
+        return response()->json([
+            'data' => new BannerResource($banner)
+        ],200);
+    }
 
     /**
      * Update the specified resource in storage.
@@ -91,9 +94,9 @@ class Banner extends Controller
 
 
         return response()->json([
-            'messages' => 'data berhasil diupdate',
+            'messages' => 'Banner berhasil diupdate',
             'data' => new BannerResource($Banner)
-        ], 201);
+        ], 200);
     }
 
     /**
@@ -106,7 +109,7 @@ class Banner extends Controller
         }
         $Banner->delete();
         return response()->json([
-            'messages' => 'data berhasil dihapus',
+            'messages' => 'Banner berhasil dihapus',
         ], 200);
     }
 }

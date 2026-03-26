@@ -17,14 +17,10 @@ class CategoryController extends Controller
     public function index()
     {
         $category = Category::orderBy('created_at', 'desc')->get();
-        if (empty($category)) {
-            return response()->json(['message' => 'Data not Found'], 404);
-        } else {
-            return response()->json([
-                'succes' => true,
-                'data' => CategoryResource::collection($category)
-            ], 200);
+        if ($category->isEmpty()) {
+            return response()->json(['message' => 'Category not Found'], 404);
         }
+        return  CategoryResource::collection($category);
     }
 
     /**
@@ -58,17 +54,11 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($slug)
+    public function show(Category $category)
     {
-        $category = Category::where('slug', $slug)->get();
-        if (empty($category)) {
-            return response()->json(['message' => 'Data not Found'], 404);
-        } else {
-            return response()->json([
-                'succes' => true,
-                'data' => new CategoryResource($category)
-            ], 200);
-        }
+        return response()->json([
+            'data' => new CategoryResource($category)
+        ], 200);
     }
 
     /**
@@ -93,7 +83,7 @@ class CategoryController extends Controller
         ]);
 
         return response()->json([
-            'messages' => 'data berhasil diupdate',
+            'messages' => 'Category berhasil diupdate',
             'data' => new CategoryResource($category)
         ], 200);
     }
@@ -105,7 +95,7 @@ class CategoryController extends Controller
     {
         $category->delete();
         return response()->json([
-            'messages' => 'data berhasil dihapus',
+            'messages' => 'Category berhasil dihapus',
         ], 200);
     }
 }

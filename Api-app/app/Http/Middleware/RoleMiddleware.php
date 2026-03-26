@@ -21,7 +21,7 @@ class RoleMiddleware
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
+        $roles = explode('|', $roles);
         // Role tidak cocok → 403
         if (!in_array($user->role, $roles)) {
             return response()->json(['message' => 'Forbidden'], 403);

@@ -16,14 +16,13 @@ class SkinTypes extends Controller
      */
     public function index()
     {
-        $Skin_type = SkinType::orderBy('created_at','desc')->get();
-        if ($Skin_type->count()) {
-            return SkinTypesResource::collection($Skin_type);
-        } else {
+        $Skin_type = SkinType::orderBy('created_at', 'desc')->get();
+        if ($Skin_type->isEmpty()) {
             return response()->json([
                 'message' => 'Skin Type not Found',
             ], 404);
         }
+        return SkinTypesResource::collection($Skin_type);
     }
 
     /**
@@ -65,14 +64,10 @@ class SkinTypes extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($slug)
+    public function show(SkinType $Skin_type)
     {
-        $Skin_type = SkinType::where('slug',$slug)->get();
-        if ($Skin_type->count()) {
-            return new SkinTypesResource($Skin_type);
-        } else {
-            return response()->json(['message' => 'Skin type not found'],404);
-        }
+
+        return response()->json(['data' => new SkinTypesResource($Skin_type)],200);
     }
 
     /**
@@ -107,7 +102,7 @@ class SkinTypes extends Controller
             return response()->json([
                 'messages' => 'Skin Type berhasil diupdate',
                 'data' => new SkinTypesResource($Skin_type)
-            ], 201);
+            ], 200);
         }
     }
 
@@ -125,6 +120,6 @@ class SkinTypes extends Controller
         return response()->json([
             'message' => 'Skin Type berhasil di hapus',
 
-        ], 201);
+        ], 200);
     }
 }

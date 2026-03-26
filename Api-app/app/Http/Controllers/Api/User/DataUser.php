@@ -6,10 +6,8 @@ use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Resources\DataUserResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Validator;
-use App\Models\DataUser as ModelsDataUser;
 use App\Models\User;
 
 class DataUser extends Controller
@@ -22,11 +20,10 @@ class DataUser extends Controller
         $DataUser = User::where('role', 'user')->get();
         if ($DataUser->isEmpty()) {
             return response()->json([
-                'messages' => "Data Not Found"
+                'messages' => "User Not Found"
             ], 404);
-        } else {
-            return UserResource::collection($DataUser);
         }
+        return UserResource::collection($DataUser);
     }
 
     /**
@@ -39,12 +36,12 @@ class DataUser extends Controller
      */
     public function register(Request $request)
     {
-        $validasi = Validator::make($request->all(),[
+        $validasi = Validator::make($request->all(), [
             'name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',
         ]);
-         if ($validasi->fails()) {
+        if ($validasi->fails()) {
             return response()->json([
                 'error' => $validasi->messages()
             ], 422);
@@ -67,7 +64,7 @@ class DataUser extends Controller
     public function show(Request $request)
     {
         $DataUser = $request->user();
-        return new DataUserResource($DataUser);
+        return new UserResource($DataUser);
     }
 
     /**
@@ -82,12 +79,12 @@ class DataUser extends Controller
     {
         $user = $request->user();
 
-        $validasi = Validator::make($request->all(),[
+        $validasi = Validator::make($request->all(), [
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'name' => 'sometimes|string',
             'password' => 'sometimes|min:8',
         ]);
-          if ($validasi->fails()) {
+        if ($validasi->fails()) {
             return response()->json([
                 'error' => $validasi->messages()
             ], 422);
@@ -100,8 +97,8 @@ class DataUser extends Controller
         $user->update($data);
         return response()->json([
             'messages' => 'Data Berhasil diupdate',
-            'data' => new DataUserResource($user)
-        ], 201);
+            'data' => new UserResource($user)
+        ], 200);
     }
 
     public function updatePhone(Request $request)
@@ -126,7 +123,7 @@ class DataUser extends Controller
 
         return response()->json([
             'message' => 'OTP dikirim ke nomor anda'
-        ]);
+        ],200);
     }
 
 
@@ -140,6 +137,6 @@ class DataUser extends Controller
         $user->delete();
         return response()->json([
             'messages' => 'data berhasil dihapus',
-        ], 201);
+        ], 200);
     }
 }

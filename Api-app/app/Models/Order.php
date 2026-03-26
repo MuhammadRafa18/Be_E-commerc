@@ -2,19 +2,45 @@
 
 namespace App\Models;
 
-use App\Models\Addres;
-use App\Models\Produk;
-use App\Models\DataUser;
+
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
     use HasFactory;
     protected $table = 'orders';
-    protected $fillable = ['user_id', 'addres_id', 'produk_id', 'qty', 'diskon', 'ongkir', 'total', 'status', 'trackingNumber'];
+    protected $fillable = [
+        'user_id',
+        'invoice_number',
+        'address_id',
+        'zones_region_id',
+        'shipping_name',
+        'shipping_phone',
+        'shipping_street',
+        'shipping_city',
+        'shipping_province',
+        'subtotal',
+        'diskon',
+        'ongkir',
+        'total',
+        'status',
+        'trackingNumber',
+        'estimated_delivery_min',
+        'estimated_delivery_max',
+    ];
 
-    public function data_user()
+
+    protected static function booted()
+    {
+        static::creating(function ($order) {
+            $order->invoice_number = 'INV-' . now()->format('Ymd') . '-' . Str::upper(Str::random(8));
+        });
+    }
+
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
@@ -22,12 +48,14 @@ class Order extends Model
     {
         return $this->belongsTo(Addres::class);
     }
-    public function produk()
+    public function order_item()
     {
-        return $this->belongsTo(Produk::class);
+        return $this->hasMany(OrderItem::class);
     }
-    public function payment()
-    {
-        return $this->hasOne(Payment::class);
+    public function payments(){
+         return $this->hasMany(Payment::class);
+    }
+    public function zones_region(){
+        return $this->belongsTo(ZoneRegion::class);
     }
 }

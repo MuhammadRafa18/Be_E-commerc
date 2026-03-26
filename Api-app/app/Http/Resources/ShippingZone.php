@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class Cart extends JsonResource
+class ShippingZone extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,10 +17,8 @@ class Cart extends JsonResource
         // return parent::toArray($request);
         return [
             'id' => $this->id,
-            'user_id' => $this->user_id,
-            'produk' => $this->whenLoaded('produk', fn () => new ProdukResource($this->produk)),
-            'qty' => $this->qty,
-            'is_selected' => $this->is_selected,
+            'name' => $this->name,
+            'price' => $this->price,
         ];
     }
 }

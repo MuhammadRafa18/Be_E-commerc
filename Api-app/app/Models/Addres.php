@@ -14,6 +14,6 @@ class Addres extends Model
     protected $fillable = ['user_id','fullname','streetname','place','provinci','city'];
      
     public function  user()  {
-         return $this->belongsTo(DataUser::class);
+         return $this->belongsTo(User::class);
     }
 }

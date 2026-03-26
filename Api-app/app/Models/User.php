@@ -25,10 +25,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'phone',
         'role',
-        'status',
         'profile_image',
         'google_id',
-        'email_verified_at'
+        'email_verified_at',
+        'phone_verified_at',
+        'phone_otp',
+        'phone_otp_expires_at',
     ];
 
     /**
@@ -54,5 +56,18 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmailCustom);
+    }
+
+        public function addres()
+    {
+        return $this->hasMany(Addres::class);
+    }
+    public function  favorite()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+    public function cart()
+    {
+        return $this->hasMany(Cart::class);
     }
 }

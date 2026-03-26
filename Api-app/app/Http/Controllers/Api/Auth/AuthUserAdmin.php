@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\UserAdmin;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+
 
 class AuthUserAdmin extends Controller
 {
@@ -30,7 +28,7 @@ class AuthUserAdmin extends Controller
             'message' => 'Login sukses',
             'token' => $token,
             'user' => $user
-        ]);
+        ],200);
     }
     public function logout(Request $request)
     {
@@ -38,6 +36,6 @@ class AuthUserAdmin extends Controller
         
         return response()->json([
             'message' => 'Logout sukses'
-        ]);
+        ],200);
     }
 }

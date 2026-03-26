@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\FavoriteResource;
 use App\Models\Favorite;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+
 
 class FavoriteController extends Controller
 {
@@ -16,10 +16,12 @@ class FavoriteController extends Controller
         $favorites = Favorite::with('produk')
             ->where('user_id', $user->id)->latest()
             ->get();
-
-        return response()->json([
-            'data' => FavoriteResource::collection($favorites)
-        ], 200);
+        if ($favorites->isEmpty()) {
+            return response()->json([
+                'messages' => 'Favorite  not found'
+            ], 404);
+        }
+        return FavoriteResource::collection($favorites);
     }
     public function toggleOn(Request $request)
     {

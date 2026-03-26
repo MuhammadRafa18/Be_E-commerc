@@ -24,12 +24,13 @@ class ProdukResource extends JsonResource
             'category' => $this->whenLoaded('category'),
             'skin_type' => $this->skin_type->pluck('id'),
             'price' => $this->price,
+            'sell_price' => $this->sell_price,
             'size' => $this->size,
-            'rating' => $this->rating,
             'stok' => $this->stok,
             'description' => $this->description,
             'useproduk' => $this->useproduk,
             'ingredient' => $this->ingredient,
+            'is_active' => $this->is_active,
             'created_at' => $this->created_at,
 
 

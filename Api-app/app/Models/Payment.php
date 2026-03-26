@@ -11,12 +11,12 @@ class Payment extends Model
 
     protected $table = 'payment';
 
-    protected $fillable = [
-    'order_id','transaction_id', 'gross_amount',
-    'payment_type','transaction_status','fraud_status','snap_token','payload'];
-    protected $casts = [
-        'payload' => 'array',
-    ];
+            protected $fillable = [
+            'order_id','transaction_id', 'gross_amount', 'midtrans_order_id',
+            'payment_type','transaction_status','fraud_status','snap_token','payload'];
+        protected $casts = [
+            'payload' => 'array',
+        ];
 
     
     public function order (){

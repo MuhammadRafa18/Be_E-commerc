@@ -19,12 +19,13 @@ class Produk extends Model
         'type_id',
         'category_id',
         'price',
+        'sell_price',
         'size',
-        'rating',
         'stok',
         'description',
         'useproduk',
-        'ingredient'
+        'ingredient',
+        'is_active'
     ];
     protected static function boot()
     {

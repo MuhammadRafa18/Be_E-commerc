@@ -49,6 +49,6 @@ class GoogleAuthController extends Controller
             'message' => 'Login sukses',
             'token' => $token,
             'user' => $user
-        ]);
+        ],200);
     }
 }

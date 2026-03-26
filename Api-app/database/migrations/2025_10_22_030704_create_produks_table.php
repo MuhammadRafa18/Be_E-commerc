@@ -19,15 +19,16 @@ return new class extends Migration
             $table->string('slug')->unique()->nullable();
             $table->unsignedBigInteger('category_id');
             $table->integer('price');
-            $table->string('size');
-            $table->decimal('rating', 2, 1)->default(0);
+            $table->integer('sell_price');
+            $table->integer('size');
             $table->integer('stok');
             $table->text('description')->nullable;
             $table->text('useproduk')->nullable;
             $table->text('ingredient')->nullable;
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->foreign('category_id')->references('id')->on('category')->onDelete('cascade');
+            $table->foreign('category_id')->references('id')->on('category')->restrictOnDelete('cascade');
         });
     }
     

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\UserAdminResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -25,9 +24,8 @@ class UserAdmin extends Controller
             return response()->json([
                 'messages' => 'Data Not Found'
             ], 404);
-        } else {
-            return UserResource::collection($User);
         }
+        return UserResource::collection($User);
     }
 
     /**
@@ -40,10 +38,7 @@ class UserAdmin extends Controller
      */
     public function store(Request $request)
     {
-        if ($request->user()->role !== 'super_admin') {
-            abort(403, 'Unauthorized');
-        }
-        $validasi = Validator::make($request->all(),[
+        $validasi = Validator::make($request->all(), [
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',
             'name' => 'required|string',
@@ -73,7 +68,7 @@ class UserAdmin extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request)
+    public function me(Request $request)
     {
         return $request->user();
     }
@@ -81,7 +76,12 @@ class UserAdmin extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-
+    public function show(User $User)
+    {
+        return response()->json([
+            'data' => new UserResource($User)
+        ], 200);
+    }
 
     /**
      * Update the specified resource in storage.
@@ -89,13 +89,7 @@ class UserAdmin extends Controller
     public function update(Request $request, User $UserAdmin)
     {
         $user = $request->user();
-        if ($user->role !== 'super_admin') {
-            abort(403, 'Unauthorized');
-        }
-        if (!in_array($UserAdmin->role, ['admin', 'superadmin'])) {
-            abort(400, 'Target user is not admin');
-        }
-        $validasi = Validator::make($request->all(),[
+        $validasi = Validator::make($request->all(), [
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'password' => 'sometimes|min:8',
             'name' => 'sometimes|string',
@@ -123,8 +117,8 @@ class UserAdmin extends Controller
         $UserAdmin->update($data);
         return response()->json([
             'messages' => 'Data Berhasil diupdate',
-            'data' => new UserAdminResource($UserAdmin)
-        ], 201);
+            'data' => new UserResource($UserAdmin)
+        ], 200);
     }
 
     /**
@@ -132,17 +126,10 @@ class UserAdmin extends Controller
      */
     public function destroy(Request $request, User $UserAdmin)
     {
-        $user = $request->user();
-        if ($user->role !== 'super_admin') {
-            abort(403, 'Unauthorized');
-        }
-        if (!in_array($UserAdmin->role, ['admin', 'superadmin'])) {
-            abort(400, 'Target user is not admin');
-        }
 
         $UserAdmin->delete();
         return response()->json([
             'messages' => 'Data Berhasil dihapus'
-        ], 201);
+        ], 200);
     }
 }
