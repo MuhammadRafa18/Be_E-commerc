@@ -33,7 +33,8 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validasi = Validator::make($request->all(), [
-            'category' => 'required|string|max:100'
+            'category' => 'required|string|max:100',
+            'type' => 'required|in:skincare,fashion'
         ]);
 
         if ($validasi->fails()) {
@@ -43,6 +44,7 @@ class CategoryController extends Controller
         }
         $category = Category::create([
             'category' => $request->category,
+            'type' => $request->type,
         ]);
 
         return response()->json([
@@ -71,7 +73,8 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $validasi = Validator::make($request->all(), [
-            'category' => 'sometimes|string|max:50'
+            'category' => 'sometimes|string|max:50',
+            'type' => 'sometimes|in:skincare,fashion'
         ]);
         if ($validasi->fails()) {
             return response()->json([
@@ -80,6 +83,7 @@ class CategoryController extends Controller
         }
         $category->update([
             'category' => $request->category,
+            'type' => $request->type,
         ]);
 
         return response()->json([

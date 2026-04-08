@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController
 use App\Http\Controllers\Api\User\DataUser as AdminDataUser;
 use App\Http\Controllers\Api\Admin\Faq_category;
 use App\Http\Controllers\Api\User\FavoriteController;
-use App\Http\Controllers\Api\Admin\ProdukController;
+use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\SkinTypes;
 use App\Http\Controllers\Api\Admin\Result as AdminResult;
 use App\Http\Controllers\Api\Admin\ShippingZone;
@@ -69,8 +69,8 @@ Route::get('/phone/verify/{token}', [PhoneVertivication::class, 'verify']);
 // Register
 Route::post('register', [AdminDataUser::class, 'register']);
 // Produk
-Route::get('produk', [ProdukController::class, 'index']);
-Route::post('produk/{slug}', [ProdukController::class, 'show']);
+Route::get('product', [ProductController::class, 'index']);
+Route::post('product/{slug}', [ProductController::class, 'show']);
 // Faq Category
 Route::get('Faq_category', [Faq_category::class, 'index']);
 
@@ -126,8 +126,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     // Cart
     Route::get('cart', [Cart::class, 'index']);
     Route::post('cart', [Cart::class, 'store']);
-    Route::delete('cart/{cart}', [Cart::class, 'destroy']);
-    Route::post('cart/{cart}', [Cart::class, 'select'])->middleware('throttle:20,1');
+    Route::delete('cart/delete/{id}', [Cart::class, 'destroy']);
+    Route::post('cart/selected/{id}', [Cart::class, 'select'])->middleware('throttle:20,1');
+    
 
     // Verif Phone
     Route::post('/phone/request', [PhoneVertivication::class, 'phone'])->middleware(['throttle:2,1']);
@@ -156,10 +157,11 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
 
 
         // Produk
-        Route::post('produk', [ProdukController::class, 'store']);
-        Route::put('produk/{produk}', [ProdukController::class, 'update']);
-        Route::patch('produk/{produk}', [ProdukController::class, 'update']);
-        Route::delete('produk/{produk}', [ProdukController::class, 'destroy']);
+        Route::post('product', [ProductController::class, 'store']);
+        Route::put('product/{product}', [ProductController::class, 'update']);
+    
+        Route::patch('product/{product}', [ProductController::class, 'update']);
+        Route::delete('product/{product}', [ProductController::class, 'destroy']);
 
         //Banner
         Route::post('banner', [AdminBanner::class, 'store']);

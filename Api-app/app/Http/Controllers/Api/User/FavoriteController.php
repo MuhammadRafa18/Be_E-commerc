@@ -13,7 +13,7 @@ class FavoriteController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $favorites = Favorite::with('produk')
+        $favorites = Favorite::with('product')
             ->where('user_id', $user->id)->latest()
             ->get();
         if ($favorites->isEmpty()) {
@@ -25,15 +25,16 @@ class FavoriteController extends Controller
     }
     public function toggleOn(Request $request)
     {
-        $validator = $request->validate([
-            'produk_id' => 'required|exists:produks,id'
-        ]);
         $user = $request->user();
+        $validator = $request->validate([
+            'product_id' => 'required|exists:product,id'
+        ]);
+
 
 
         // Cek apakah sudah ada
         $favorite = Favorite::where('user_id', $user->id)
-            ->where('produk_id', $request->produk_id)
+            ->where('product_id', $request->product_id)
             ->first();
 
         if ($favorite) {
@@ -43,7 +44,7 @@ class FavoriteController extends Controller
 
         Favorite::create([
             'user_id' => $user->id,
-            'produk_id' => $validator['produk_id'],
+            'product_id' => $validator['product_id'],
         ]);
 
         return response()->json(['status' => 'liked'], 201);

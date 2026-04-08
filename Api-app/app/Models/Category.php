@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Produk;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
@@ -11,7 +11,7 @@ class Category extends Model
 {
     use HasFactory;
     protected $table = "category";
-    protected $fillable = ['category'];
+    protected $fillable = ['category','type'];
 
      protected static function boot()
     {
@@ -30,6 +30,6 @@ class Category extends Model
     }
 
        public function produk (){
-        return $this->hasMany(Produk::class);
+        return $this->hasMany(Product::class);
     }
 }

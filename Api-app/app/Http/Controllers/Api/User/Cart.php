@@ -3,16 +3,26 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCartRequest;
 use App\Http\Resources\Cart as ResourcesCart;
 use App\Models\Cart as ModelsCart;
+use App\Services\Cart\CartService;
 use Illuminate\Http\Request;
+
 
 class Cart extends Controller
 {
+
+
     public function index(Request $request)
     {
         $user = $request->user();
-        $cart = ModelsCart::where('user_id', $user->id)->with('produk')
+        $cart = ModelsCart::where('user_id', $user->id)->with(
+            'product',
+            'product_sku',
+            'product_skincare',
+            'product_fashion',
+        )
             ->latest()
             ->get();
         if ($cart->isEmpty()) {
@@ -22,57 +32,47 @@ class Cart extends Controller
         }
         return ResourcesCart::collection($cart);
     }
-    public function store(Request $request)
+    public function store(StoreCartRequest $request, CartService $service)
     {
+        // \dd($request);
         $user = $request->user();
-        $data = $request->validate([
-            'produk_id' => 'required|exists:produks,id'
-        ]);
 
-        $cart = ModelsCart::firstOrCreate(
-            [
-                'user_id' => $user->id,
-                'produk_id' => $data['produk_id'],
-
-            ],
-            [
-                'qty' => $data['qty'] ?? 1,
-            ]
-        );
-
-        if (!$cart->wasRecentlyCreated) {
-            $cart->increment('qty', $data['qty'] ?? 1);
-        }
+        $cart = $service->addToCart($request->validated(), $user);
 
         return response()->json([
-            'message' => 'Cart Berhsil ditambah',
+            'message' => 'Cart berhasil ditambah',
             'data' => new ResourcesCart($cart),
-        ],200);
+        ], 200);
     }
 
-    public function destroy(Request $request, ModelsCart $cart)
+    public function destroy(Request $request, $id)
     {
         $user = $request->user();
-        abort_if($cart->user_id !== $user->id, 403);
+
+        $cart = ModelsCart::where('id', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
 
         $cart->delete();
+
         return response()->json([
             'message' => 'Cart berhasil dihapus'
-        ],200);
+        ], 200);
     }
-    public function select(Request $request, ModelsCart $cart)
+    public function select(Request $request, $id)
     {
         $user = $request->user();
 
-        abort_if($cart->user_id !== $user->id, 403);
-        // dd($cart->is_selected);
+        $cart = ModelsCart::where('id', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
 
         $cart->update([
             'is_selected' => !$cart->is_selected
         ]);
-        $cart->refresh();
+
         return response()->json([
             'is_selected' => $cart->is_selected
-        ],200);
+        ], 200);
     }
 }

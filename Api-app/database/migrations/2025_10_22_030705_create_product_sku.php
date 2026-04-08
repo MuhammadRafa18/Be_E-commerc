@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_skin_type', function (Blueprint $table) {
+         Schema::create('product_sku', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('skin_type_id');
             $table->unsignedBigInteger('product_id');
+            $table->integer('price');
+            $table->integer('sell_price');
+            $table->integer('stock')->default(0);         
+            $table->integer('weight_gram')->default(0);         
             $table->timestamps();
 
-            $table->foreign('skin_type_id')->references('id')->on('skin_type')->restrictOnDelete('cascade');    
-            $table->foreign('product_id')->references('id')->on('product')->onDelete('cascade');    
+            $table->foreign('product_id')->references('id')->on('product')->onDelete('cascade'); 
         });
     }
 
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_types');
+        Schema::dropIfExists('product_sku');
     }
 };

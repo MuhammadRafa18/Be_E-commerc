@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('favorites', function (Blueprint $table) {
+        Schema::create('product_fashion', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->constrained('users')->onDelete('cascade');;
-            $table->unsignedBigInteger('product_id')->constrained('product')->onDelete('cascade');;
+            $table->unsignedBigInteger('product_sku_id');
+            $table->string('size')->nullable();
+            $table->string('color')->nullable();
             $table->timestamps();
 
-             $table->unique(['user_id', 'product_id']);
+            $table->foreign('product_sku_id')->references('id')->on('product_sku')->onDelete('cascade'); 
         });
     }
 
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('favorites');
+        Schema::dropIfExists('product_fashion');
     }
 };

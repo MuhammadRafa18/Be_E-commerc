@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Type;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
@@ -29,6 +29,6 @@ class SkinType extends Model
         });
     }
     public function produk(){
-        return $this->belongsToMany(Produk::class);
+        return $this->belongsToMany(Product::class);
     }
 }

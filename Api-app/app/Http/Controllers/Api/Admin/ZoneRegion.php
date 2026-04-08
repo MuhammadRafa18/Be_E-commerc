@@ -46,7 +46,7 @@ class ZoneRegion extends Controller
         $data = $request->validate([
             'shipping_zone_id' => 'required|integer|exists:shipping_zone,id',
             'region' => 'sometimes|string',
-             'estimasi_min_day' => 'sometimes|integer',
+            'estimasi_min_day' => 'sometimes|integer',
             'estimasi_max_day' => 'sometimes|integer'
         ]);
         $zoneRegion->update($data);

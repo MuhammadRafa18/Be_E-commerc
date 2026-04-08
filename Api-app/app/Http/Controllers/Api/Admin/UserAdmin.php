@@ -126,7 +126,7 @@ class UserAdmin extends Controller
      */
     public function destroy(Request $request, User $UserAdmin)
     {
-
+       
         $UserAdmin->delete();
         return response()->json([
             'messages' => 'Data Berhasil dihapus'

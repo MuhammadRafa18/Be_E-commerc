@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('place');
             $table->string('provinci');
             $table->string('city');
+            $table->text('note')->nullable();
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 

@@ -36,7 +36,7 @@ class PaymentController extends Controller
                 ->latest()
                 ->first();
 
-            if ($existingPayment) {
+            if ($existingPayment && $existingPayment->expires_at > now()) {
                 return [
                     'payment_id' => $existingPayment->id,
                     'snap_token' => $existingPayment->snap_token,
@@ -53,6 +53,7 @@ class PaymentController extends Controller
                 'transaction_status' => 'Pending',
                 'snap_token'     => null, // Nanti diupdate
                 'payload'        => null, // Nanti diupdate
+                'expires_at' => now()->addMinutes(15)
             ]);
 
             //    2. Snaphot Midtrans

@@ -9,14 +9,26 @@ class Cart extends Model
 {
     use HasFactory;
     protected $table = 'carts';
-    protected $fillable = ['user_id', 'produk_id', 'qty' ,'is_selected'];
+    protected $fillable = ['user_id', 'product_id','product_sku_id','product_fashion_id','product_skincare_id' ,'qty' ,'is_selected'];
     protected $casts = [
         'is_selected' => 'boolean',
     ];
 
-    public function produk()
+    public function product()
     {
-        return $this->belongsTo(Produk::class);
+        return $this->belongsTo(Product::class);
+    }
+    public function product_sku()
+    {
+        return $this->belongsTo(ProductSku::class);
+    }
+    public function product_fashion()
+    {
+        return $this->belongsTo(ProductFashion::class);
+    }
+    public function product_skincare()
+    {
+        return $this->belongsTo(ProductSkincare::class);
     }
     public function user()
     {
