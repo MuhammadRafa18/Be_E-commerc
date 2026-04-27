@@ -22,7 +22,14 @@ class ProductResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'category' => $this->whenLoaded('category'),
-            'skin_type' => $this->skin_type->pluck('id'),
+            'skin_type' => $this->whenLoaded('skin_type', function () {
+                return $this->skin_type->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'type' => $item->type,
+                    ];
+                });
+            }),
             'description' => $this->description,
             'product_sku' => $this->when($this->product_sku->isNotEmpty(), function () {
                 $sku = $this->product_sku->first(); // ambil satu SKU saja
@@ -36,6 +43,7 @@ class ProductResource extends JsonResource
                 ];
             }),
 
+            'is_active' => $this->is_active,
 
         ];
     }

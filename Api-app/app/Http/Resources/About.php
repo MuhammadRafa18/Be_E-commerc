@@ -30,10 +30,7 @@ class About extends JsonResource
                 ? $this->image_visi
                 : null,
             'visi_misi' => $this->visi_misi,
-            'icon' => $this->icon
-                ? collect($this->icon)->map(fn($img) => $img)
-                : [],
-            'power' => $this->power ?? [],
+            'powers' => $this->whenLoaded('powers'),
             'created_at' => $this->created_at,
         ];
     }

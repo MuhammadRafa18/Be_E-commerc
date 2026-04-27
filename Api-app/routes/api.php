@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\User\PhoneVertivication;
 use App\Http\Controllers\Api\User\Cart;
 use App\Http\Controllers\Api\User\ContactController;
 use App\Http\Controllers\Api\User\PaymentController;
+use App\Http\Controllers\Api\User\VisitorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -73,7 +74,8 @@ Route::get('product', [ProductController::class, 'index']);
 Route::post('product/{slug}', [ProductController::class, 'show']);
 // Faq Category
 Route::get('Faq_category', [Faq_category::class, 'index']);
-
+// Visitor
+Route::post('/visitor', [VisitorController::class, 'store']);
 // CATEGORY
 Route::get('category', [AdminCategoryController::class, 'index']);
 
@@ -141,13 +143,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 // Hak ases Admin dn Super admin
 Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
     ->prefix('admin')
-    ->group(function () {
+    ->group(function () {   
 
         // Category
         Route::get('category/{category}', [AdminCategoryController::class, 'show']);
         Route::post('category', [AdminCategoryController::class, 'store']);
         Route::put('category/{category}', [AdminCategoryController::class, 'update']);
-        Route::patch('category{category}', [AdminCategoryController::class, 'update']);
+        Route::patch('category/{category}', [AdminCategoryController::class, 'update']);
         Route::delete('category/{category}', [AdminCategoryController::class, 'destroy']);
 
         // Order
@@ -159,7 +161,6 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
         // Produk
         Route::post('product', [ProductController::class, 'store']);
         Route::put('product/{product}', [ProductController::class, 'update']);
-    
         Route::patch('product/{product}', [ProductController::class, 'update']);
         Route::delete('product/{product}', [ProductController::class, 'destroy']);
 
@@ -208,10 +209,15 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
         // User 
          Route::get('me', [UserAdmin::class, 'me']);
 
+        // User Client
+        Route::get('DataUser', [AdminDataUser::class, 'index']);
+
         //  Shipping Zone
         Route::apiResource('shippingZone',ShippingZone::class);
         // Zone Region
         Route::apiResource('zoneRegion',ZoneRegion::class);
+        // visitor
+        Route::get('/visitor', [VisitorController::class, 'index']);
     });
 
 

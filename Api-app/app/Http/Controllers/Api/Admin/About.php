@@ -13,7 +13,7 @@ class About extends Controller
 {
     public function index()
     {
-        $about = ModelsAbout::orderBy('created_at', 'desc')->get();
+        $about = ModelsAbout::with('powers')->orderBy('created_at', 'desc')->get();
         if ($about->isEmpty()) {
             return response()->json([
                 'message' => 'About Not Found'
@@ -32,15 +32,15 @@ class About extends Controller
         $validator = Validator::make($request->all(), [
             'headline'    => 'required|string|max:255',
             'title'       => 'required|string|max:255',
-            'subtitle'    => 'required|string|max:255',
+            'subtitle'    => 'required|string',
             'image'       => 'nullable|image|mimes:wep,png,jpg|max:2048',
-            'paragraf'    => 'required|string|max:255',
+            'paragraf'    => 'required|string',
             'image_visi'  => 'nullable|image|mimes:wep,png,jpg|max:2048',
-            'icon'      => 'nullable|array',
-            'icon.*'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
-            'power' => 'nullable|array',
-            'power.*' => 'required|string|max:255',
-            'visi_misi'   => 'required|string|max:255',
+            'visi_misi'   => 'required|string',
+
+            'powers'             => 'nullable|array',
+            'powers.*.label'     => 'required|string|max:255',
+            'powers.*.icon'      => 'nullable|image|mimes:jpeg,png,jpg,svg|max:5120'
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -49,7 +49,7 @@ class About extends Controller
             ], 422);
         }
 
-        $data = $validator->validate();
+        $data = $validator->safe()->except(['powers']);
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('about', 'public');
@@ -57,15 +57,25 @@ class About extends Controller
         if ($request->hasFile('image_visi')) {
             $data['image_visi'] = $request->file('image_visi')->store('about', 'public');
         }
-        if ($request->hasFile('icon')) {
-            $paths = [];
-            foreach ($request->file('icon') as $img) {
-                $paths[] = $img->store('about', 'public');
-            }
-            $data['icon'] = $paths;
-        }
+
 
         $about = ModelsAbout::create($data);
+
+        if ($request->has('powers')) {
+            foreach ($request->powers as $index => $power) {
+                $iconPath = null;
+                if ($request->hasFile("powers.{$index}.icon")) {
+                    $iconPath = $request->file("powers.{$index}.icon")
+                        ->store('about/powers', 'public');
+                }
+
+                $about->powers()->create([
+                    'label' => $power['label'],
+                    'icon'  => $iconPath,
+                    'order' => $index,
+                ]);
+            }
+        }
 
         return response()->json([
             'message' => 'About berhasil dibuat',
@@ -75,7 +85,7 @@ class About extends Controller
 
     public function show($slug)
     {
-        $about = ModelsAbout::where('slug', $slug)->firstOrFail();
+        $about = ModelsAbout::with('powers')->where('slug', $slug)->firstOrFail();
         return response()->json([
             'data'    => new ResourcesAbout($about)
         ], 200);
@@ -90,11 +100,12 @@ class About extends Controller
             'image'       => 'sometimes|image|mimes:wep,png,jpg|max:2048',
             'paragraf'    => 'sometimes|string|max:255',
             'image_visi'  => 'sometimes|image|mimes:wep,png,jpg|max:2048',
-            'icon'      => 'sometimes|array',
-            'icon.*'      => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
-            'power' => 'sometimes|array',
-            'power.*' => 'sometimes|string|max:255',
             'visi_misi'   => 'sometimes|string|max:255',
+
+            'powers'             => 'sometimes|array',
+            'powers.*.id'        => 'sometimes|exists:about_powers,id',
+            'powers.*.label'     => 'required_with:powers|string|max:255',
+            'powers.*.icon'      => 'nullable|image|mimes:jpeg,png,jpg,svg|max:5120',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -102,7 +113,8 @@ class About extends Controller
                 'errors'  => $validator->errors()
             ], 422);
         }
-        $data = $validator->validate();
+        $data = $validator->safe()->except(['powers']);
+
         if ($request->hasFile('image')) {
             if ($about->image && Storage::disk('public')->exists($about->image)) {
                 Storage::disk('public')->delete($about->image);
@@ -116,22 +128,44 @@ class About extends Controller
             $data['image_visi'] = $request->file('image_visi')->store('about', 'public');
         }
 
-        if ($request->hasFile('icon')) {
-            // delete old
-            if ($about->icon) {
-                foreach ($about->icon as $old) {
-                    Storage::disk('public')->delete($old);
-                }
-            }
-
-            $newImages = [];
-            foreach ($request->file('icon') as $img) {
-                $newImages[] = $img->store('about', 'public');
-            }
-            $data['icon'] = $newImages;
-        }
-
         $about->update($data);
+
+        if ($request->has('powers')) {
+            $incomingIds = collect($request->powers)
+                ->pluck('id')
+                ->filter()
+                ->toArray();
+
+
+            $about->powers()
+                ->whereNotIn('id', $incomingIds)
+                ->each(function ($power) {
+                    Storage::disk('public')->delete($power->icon);
+                    $power->delete();
+                });
+
+            foreach ($request->powers as $index => $power) {
+                $iconPath = null;
+                if ($request->hasFile("powers.{$index}.icon")) {
+
+                    if (isset($power['id'])) {
+                        $old = $about->powers()->find($power['id']);
+                        Storage::disk('public')->delete($old?->icon);
+                    }
+                    $iconPath = $request->file("powers.{$index}.icon")
+                        ->store('about/powers', 'public');
+                }
+
+                $about->powers()->updateOrCreate(
+                    ['id' => $power['id'] ?? null],
+                    [
+                        'label' => $power['label'],
+                        'icon'  => $iconPath ?? $about->powers()->find($power['id'] ?? null)?->icon,
+                        'order' => $index,
+                    ]
+                );
+            }
+        }
         return response()->json([
             'message' => 'About berhasil diupadte',
             'data' => new ResourcesAbout($about)
@@ -146,13 +180,13 @@ class About extends Controller
         if (!empty($about->image_visi) && Storage::disk('public')->exists($about->image_visi)) {
             Storage::disk('public')->delete($about->image_visi);
         }
-        if (!empty($about->icon) && is_array($about->icon)) {
-            foreach ($about->icon as $img) {
-                if (Storage::disk('public')->exists($img)) {
-                    Storage::disk('public')->delete($img);
-                }
+        foreach ($about->powers as $power) {
+            if (!empty($power->icon)) {
+                Storage::disk('public')->delete($power->icon);
             }
         }
+
+        $about->powers()->delete();
 
         $about->delete();
         return response()->json([

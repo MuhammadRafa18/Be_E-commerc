@@ -24,12 +24,11 @@ class UpdateProductRequest extends FormRequest
     public function rules()
     {
 
-        // ambil category
-        $category = Category::findOrFail($this->category_id);
+    
+        $category = Category::findOrFail($this->product->category_id);
 
         $skuId = $this->product->product_sku->first()->id ?? null;
-
-        // base rules
+    
         $rules = [
             'image_produk' => 'sometimes|image|max:2048',
             'image_banner' => 'sometimes|image|max:2048',
@@ -45,6 +44,7 @@ class UpdateProductRequest extends FormRequest
             'sell_price' => 'sometimes|numeric|min:0',
             'stock' => 'sometimes|integer|min:0',
             'weight_gram' => 'sometimes|integer|min:0',
+            'is_active' => 'sometimes|boolean'
         ];
 
         // kalau category gak ditemukan → stop

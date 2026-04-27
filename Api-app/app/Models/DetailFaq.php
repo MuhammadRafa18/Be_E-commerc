@@ -28,7 +28,7 @@ class DetailFaq extends Model
         });
     }
 
-    public function faq()
+    public function faq_category()
     {
        return $this->belongsTo(Faq_category::class);
     }

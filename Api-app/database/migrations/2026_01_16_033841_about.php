@@ -15,13 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('headline')->nullable();
             $table->string('title')->nullable();
-            $table->string('subtitle')->nullable();
+            $table->text('subtitle')->nullable();
             $table->string('slug')->unique();
             $table->string('image')->nullable();
             $table->text('paragraf')->nullable();
             $table->string('image_visi')->nullable();
-            $table->json('icon')->nullable();
-            $table->json('power')->nullable();
             $table->text('visi_misi')->nullable();
             $table->timestamps();
         });

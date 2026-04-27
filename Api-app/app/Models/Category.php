@@ -11,7 +11,7 @@ class Category extends Model
 {
     use HasFactory;
     protected $table = "category";
-    protected $fillable = ['category','type'];
+    protected $fillable = ['category','type','is_active'];
 
      protected static function boot()
     {

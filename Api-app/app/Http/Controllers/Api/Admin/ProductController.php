@@ -37,7 +37,7 @@ class ProductController extends Controller
         ])
             ->latest()
             ->paginate(10);
-
+            
 
         if ($product->isEmpty()) {
             return response()->json(['messages' => 'Produk Not found'], 404);
@@ -104,9 +104,9 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-
+   
         $data = $request->validated();
-        // \dd($data);
+   
         if ($request->hasFile('image_produk')) {
             if ($product->image_produk && Storage::disk('public')->exists($product->image_produk)) {
                 Storage::disk('public')->delete($product->image_produk);
@@ -133,7 +133,7 @@ class ProductController extends Controller
     {
         $produk = Product::findOrFail($id);
 
-        $usedInOrder = OrderItem::where('produk_id', $id)->exists();
+        $usedInOrder = OrderItem::where('product_id', $id)->exists();
 
         if ($usedInOrder) {
             return response()->json([

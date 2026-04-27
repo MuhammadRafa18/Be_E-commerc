@@ -93,7 +93,7 @@ class UserAdmin extends Controller
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'password' => 'sometimes|min:8',
             'name' => 'sometimes|string',
-            'role' => 'sometimes|in:admin,superadmin',
+            'role' => 'sometimes|in:admin,super_admin',
             'profile_image' => 'sometimes|image|max:2048',
         ]);
         if ($validasi->fails()) {
@@ -124,9 +124,9 @@ class UserAdmin extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, User $UserAdmin)
+    public function destroy(User $UserAdmin)
     {
-       
+        $UserAdmin->tokens()->delete(); 
         $UserAdmin->delete();
         return response()->json([
             'messages' => 'Data Berhasil dihapus'

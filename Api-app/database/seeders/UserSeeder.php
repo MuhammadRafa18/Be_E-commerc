@@ -15,10 +15,10 @@ class UserSeeder extends Seeder
     {
         $users = [
             [
-                'email' => 'admin@gmail.com',
-                'name' => 'admin',
+                'email' => 'superadmin@gmail.com',
+                'name' => 'super admin',
                 'role' => 'super_admin',
-                'password' => Hash::make('admin123'),
+                'password' => Hash::make('superadmin123'),
                 'email_verified_at' => now(),
                 'phone_verified_at' => now(),
             ],
@@ -31,6 +31,14 @@ class UserSeeder extends Seeder
                 'phone_verified_at' => now(),
                 'phone' => "6285724215989",
 
+            ],
+            [
+                'email' => 'admin@gmail.com',
+                'name' => 'admin',
+                'role' => 'admin',
+                'password' => Hash::make('admin123'),
+                'email_verified_at' => now(),
+                'phone_verified_at' => now(),
             ]
         ];
         foreach($users as $user){

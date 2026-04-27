@@ -59,6 +59,8 @@ class SkincareProductHandler implements ProductHandlerInterface
                 'description' => $request['description'] ?? $product->description,
                 'image_produk' => $request['image_produk'] ?? $product->image_produk,
                 'image_banner' => $request['image_banner'] ??  $product->image_banner,
+                'is_active' => $request['is_active'] ??  $product->is_active,
+
             ]);
 
             $skuData = array_filter([
@@ -77,8 +79,8 @@ class SkincareProductHandler implements ProductHandlerInterface
             }
 
             $product_skincare = array_filter([
-                'product_sku_id' => $sku->id,
-                'size' => $request['size'],
+                'product_sku_id' => $sku->id ?? null,
+                'size' => $request['size'] ?? null,
                 'use_produk' => $request['use_produk'] ?? null,
                 'ingredient' => $request['ingredient'] ?? null,
             ], fn($v) => !is_null($v));  // buang yang null
@@ -90,9 +92,11 @@ class SkincareProductHandler implements ProductHandlerInterface
                     $product_skincare  // hanya field yang dikirim yang terupdate
                 );
             }
-            if ($request['skin_type_id']) {
+        
+            if (!empty($request['skin_type_id'])) {
                 $product->skin_type()->sync($request['skin_type_id']);
             }
+
             return $product;
         });
     }

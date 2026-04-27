@@ -74,17 +74,15 @@ class CategoryController extends Controller
     {
         $validasi = Validator::make($request->all(), [
             'category' => 'sometimes|string|max:50',
-            'type' => 'sometimes|in:skincare,fashion'
+            'type' => 'sometimes|in:skincare,fashion',
+            'is_active' => 'sometimes|boolean',
         ]);
         if ($validasi->fails()) {
             return response()->json([
                 'error' => $validasi->messages()
             ], 422);
         }
-        $category->update([
-            'category' => $request->category,
-            'type' => $request->type,
-        ]);
+        $category->update($validasi->validated());
 
         return response()->json([
             'messages' => 'Category berhasil diupdate',

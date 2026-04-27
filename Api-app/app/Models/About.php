@@ -12,11 +12,7 @@ class About extends Model
 
     protected $table = 'about';
 
-    protected $fillable = ['headline','title','subtitle','image','paragraf','image_visi','visi_misi','power','icon'];
-     protected $casts = [
-        'icon' => 'array',
-        'power'   => 'array',
-    ];
+    protected $fillable = ['headline','title','subtitle','image','paragraf','image_visi','visi_misi'];
 
     protected static function boot()
     {
@@ -33,6 +29,10 @@ class About extends Model
             }
         });
     }
+    public function powers()
+{
+    return $this->hasMany(Power::class)->orderBy('order');
+}
 
 
 

@@ -19,6 +19,7 @@ class FashionProductHandler implements ProductHandlerInterface
                 'description' => $request['description'],
                 'image_produk' => $request['image_produk'],
                 'image_banner' => $request['image_banner'],
+
             ]);
 
             $sku = ProductSku::create([
@@ -52,6 +53,7 @@ class FashionProductHandler implements ProductHandlerInterface
                 'description' => $request['description'] ?? $product->description,
                 'image_produk' => $request['image_produk'] ?? $product->image_produk,
                 'image_banner' => $request['image_banner'] ?? $product->image_banner,
+                'is_active' => $request['is_active'] ??  $product->is_active,
             ]);
 
             $skuData = array_filter([
