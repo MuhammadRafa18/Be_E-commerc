@@ -34,15 +34,20 @@ class Cart extends Controller
     }
     public function store(StoreCartRequest $request, CartService $service)
     {
-      
+
         $user = $request->user();
+        try {
+            $cart = $service->addToCart($request->validated(), $user);
 
-        $cart = $service->addToCart($request->validated(), $user);
-
-        return response()->json([
-            'message' => 'Cart berhasil ditambah',
-            'data' => new ResourcesCart($cart),
-        ], 200);
+            return response()->json([
+                'message' => 'Cart berhasil ditambah',
+                'data' => new ResourcesCart($cart),
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
 
     public function destroy(Request $request, $id)

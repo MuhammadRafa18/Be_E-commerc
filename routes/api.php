@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\About;
 use App\Http\Controllers\Api\Admin\Banner as AdminBanner;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\User\DataUser as AdminDataUser;
 use App\Http\Controllers\Api\Admin\Faq_category;
 use App\Http\Controllers\Api\User\FavoriteController;
@@ -218,7 +219,8 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
         // Zone Region
         Route::apiResource('zoneRegion',ZoneRegion::class);
         // visitor
-        Route::get('/visitor', [VisitorController::class, 'index']);
+        Route::get('/visitor', [DashboardController::class, 'indexVisit']);
+        Route::get('/top-categories', [DashboardController::class, 'getTopCategories']);
     });
 
 

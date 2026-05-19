@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('product_sku_id');
             $table->unsignedBigInteger('product_fashion_id')->nullable();
             $table->unsignedBigInteger('product_skincare_id')->nullable();
-            $table->integer('qty');
+            $table->integer('qty')->default(0);
             $table->boolean('is_selected')->default(true);
             $table->timestamps();
             

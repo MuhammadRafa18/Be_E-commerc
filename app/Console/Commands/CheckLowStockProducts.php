@@ -30,7 +30,9 @@ class CheckLowStockProducts extends Command
     public function handle()
     {
         $batasMin = 5;
-        $lowStockSkus = ProductSku::with('product')->where('is_active', true)
+        $lowStockSkus = ProductSku::with('product')->whereHas('product', function ($query) {
+            $query->where('is_active', true); 
+        })
             ->where('stock', '<=', $batasMin)
             ->where('stock', '>', 0)->get();
 
@@ -45,7 +47,7 @@ class CheckLowStockProducts extends Command
             $this->line($pesan);
             Log::warning($pesan);
 
-            Mail::to('admin@tokomu.com')->send(new LowStockAlertMail($sku));
+            Mail::to('arlivacosmetics@gmail.com')->send(new LowStockAlertMail($sku));
         }
 
         return self::SUCCESS;

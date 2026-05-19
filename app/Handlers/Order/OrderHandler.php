@@ -47,7 +47,8 @@ class OrderHandler implements OrderHandlerInterface
             if ($carts->isEmpty()) {
                 throw new \Exception('Pilih produk dulu', 422);
             }
-
+            $subtotal = 0;
+            $diskon  = 0;
             foreach ($carts as $item) {
                 $skuLatest = $item->product_sku()->lockForUpdate()->first();
 

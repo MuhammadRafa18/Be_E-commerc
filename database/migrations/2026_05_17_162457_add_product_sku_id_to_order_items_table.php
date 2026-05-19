@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('order_items', function (Blueprint $table) {
             $table->unsignedBigInteger('product_sku_id')
-            ->after('product_id')->nullable();
+                ->after('product_id')->nullable();
 
             $table->foreign('product_sku_id')->references('id')->on('product_sku')->nullOnDelete();
         });
@@ -25,10 +25,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
-             $table->unsignedBigInteger('product_sku_id')
-            ->after('product_id')->nullable();
 
-            $table->foreign('product_sku_id')->references('id')->on('product_sku')->nullOnDelete();
+            $table->dropForeign(['product_sku_id']);
+
+            $table->dropColumn('product_sku_id');
         });
     }
 };

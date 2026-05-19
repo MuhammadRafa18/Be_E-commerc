@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::table('orders', function (Blueprint $table) {
-            $table->timestamp('completed_at')->nullable();
-            $table->timestamp('stock_reduced_at')->nullable();
+            $table->index(['status', 'completed_at'], 'orders_status_completed_at_index');
         });
     }
 
@@ -23,11 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-
-            $table->dropColumn([
-                'completed_at',
-                'stock_reduced_at'
-            ]);
+            $table->dropIndex('orders_status_completed_at_index');
         });
     }
 };

@@ -14,7 +14,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('orders:auto-complete')->hourly();
-        Schedule::command('products:check-low-stock')->everyMinute();
+        $schedule->command('products:check-low-stock')->everyMinute();
     }
 
     /**
