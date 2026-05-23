@@ -34,7 +34,7 @@ class Cart extends Controller
     }
     public function store(StoreCartRequest $request, CartService $service)
     {
-
+        
         $user = $request->user();
         try {
             $cart = $service->addToCart($request->validated(), $user);

@@ -26,10 +26,10 @@ class CartService
             ],
             [
                 'product_id' => $product->id,
-                'qty' => $data['qty'] ?? 1,
+                'qty' => 0,
             ]
         );
-        $totalQtyBaru = $cart->qty + $qtyRequest;
+        $totalQtyBaru = $cart->wasRecentlyCreated ? $qtyRequest : ($cart->qty + $qtyRequest);
         try {
             if ($totalQtyBaru > $sku->stock) {
                 throw new \Exception("Gagal: Total di keranjangmu ({$totalQtyBaru} pcs) melebihi stok gudang ({$sku->stock} pcs).");

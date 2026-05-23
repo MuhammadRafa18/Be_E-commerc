@@ -106,20 +106,63 @@ class OrderHandler implements OrderHandlerInterface
 
     public function updateStatus(Order $order, array $data): Order
     {
-        if (
-            $data['status'] === 'Dikirim'
-            && empty($data['trackingNumber'])
-        ) {
-            throw new \Exception(
-                'Tracking number wajib diisi saat dikirim'
-            );
-        }
+        return DB::transaction(function () use ($order, $data) {
 
-        $order->update([
-            'status' => $data['status'],
-            'trackingNumber' => $data['trackingNumber'] ?? null,
-        ]);
+            $order = Order::where('id', $order->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        return $order;
+            $status = $data['status'];
+            $trackingNumber = isset($data['trackingNumber'])
+                ? strtoupper(trim($data['trackingNumber']))
+                : null;
+
+            if ($status === 'Dikirim') {
+
+                if ($order->status !== 'Diproses') {
+                    throw new \Exception(
+                        'Order ini hanya perlu trackingNumber'
+                    );
+                }
+
+                if (empty($trackingNumber)) {
+                    throw new \Exception(
+                        'Tracking number wajib diisi saat dikirim'
+                    );
+                }
+
+                $isTrackingUsed = Order::where('trackingNumber', $trackingNumber)
+                    ->where('id', '!=', $order->id)
+                    ->exists();
+
+                if ($isTrackingUsed) {
+                    throw new \Exception(
+                        'Resi ini sudah digunakan di paket lain'
+                    );
+                }
+
+                $order->update([
+                    'status' => 'Dikirim',
+                    'trackingNumber' => $trackingNumber,
+                ]);
+
+                return $order;
+            }
+
+            if ($status === 'Diproses') {
+                if ($order->status !== 'Paid') {
+                    throw new \Exception(
+                        'Order hanya bisa diproses jika sudah Paid'
+                    );
+                }
+
+                $order->update([
+                    'status' => 'Diproses',
+                ]);
+
+                return $order;
+            }
+            throw new \Exception('Status tidak valid');
+        });
     }
 }

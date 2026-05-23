@@ -9,6 +9,8 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Mail\NewOrderNotification;
+use Illuminate\Support\Facades\Mail;
 
 
 class PaymentController extends Controller
@@ -45,18 +47,18 @@ class PaymentController extends Controller
 
             $midtransOrderId = 'PAY-' . $order->id . '-' . time();
 
-            
+
             $payment = Payment::create([
                 'order_id'       => $order->id,
                 'midtrans_order_id' => $midtransOrderId,
                 'gross_amount'   => $order->total,
                 'transaction_status' => 'Pending',
-                'snap_token'     => null, 
-                'payload'        => null, 
+                'snap_token'     => null,
+                'payload'        => null,
                 'expires_at' => now()->addMinutes(15)
             ]);
 
-         
+
             $params = [
                 'transaction_details' => [
                     'order_id' => $midtransOrderId,
@@ -70,10 +72,10 @@ class PaymentController extends Controller
 
             ];
 
-            
+
             $snapToken = Snap::getSnapToken($params);
 
-      
+
             $payment->update([
                 'snap_token' => $snapToken,
                 'payload' => $params
@@ -84,7 +86,6 @@ class PaymentController extends Controller
                 'snap_token' => $snapToken,
             ];
         });
-        
     }
 
 
@@ -112,7 +113,7 @@ class PaymentController extends Controller
 
         $payment = Payment::where('midtrans_order_id', $payload['order_id'])->firstOrFail();
 
-        
+
         if (in_array($payment->transaction_status, ['settlement', 'capture'])) {
             return response()->json(['message' => 'Already processed']);
         }
@@ -140,6 +141,8 @@ class PaymentController extends Controller
                     'estimated_delivery_min' => now()->addDays($order->zones_region->estimasi_min_day),
                     'estimated_delivery_max' => now()->addDays($order->zones_region->estimasi_max_day),
                 ]);
+                Mail::to('arlivacosmetics@gmail.com')
+                    ->queue(new NewOrderNotification($order));
             }
         }
 

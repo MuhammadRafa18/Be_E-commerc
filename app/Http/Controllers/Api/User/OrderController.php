@@ -128,8 +128,14 @@ class OrderController extends Controller
     {
 
         $validasi = Validator::make($request->all(), [
-            'status' => 'required|in:Diproses,Dikirim,Selesai',
-            'trackingNumber' => 'nullable|string'
+            'status' => 'required|in:Diproses,Dikirim',
+            'trackingNumber' => [
+                'nullable',
+                'string',
+                'min:10',
+                'max:30',
+                'regex:/^[A-Za-z0-9]+$/',
+            ]
         ]);
         if ($validasi->fails()) {
             return response()->json([
