@@ -210,17 +210,23 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
 
         // User 
          Route::get('me', [UserAdmin::class, 'me']);
-
         // User Client
         Route::get('DataUser', [AdminDataUser::class, 'index']);
-
         //  Shipping Zone
         Route::apiResource('shippingZone',ShippingZone::class);
         // Zone Region
         Route::apiResource('zoneRegion',ZoneRegion::class);
         // visitor
         Route::get('/visitor', [DashboardController::class, 'indexVisit']);
+        // cart top catgeory
         Route::get('/top-categories', [DashboardController::class, 'getTopCategories']);
+        // card order
+        Route::get('/countOrder', [DashboardController::class, 'countOrder']);
+         // card User
+        Route::get('/countUser', [DashboardController::class, 'countUser']);
+         // card Transaksi
+        Route::get('/countPayment', [DashboardController::class, 'countPayment']);
+
     });
 
 

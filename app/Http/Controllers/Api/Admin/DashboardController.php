@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
+use App\Models\Payment;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -93,5 +96,102 @@ class DashboardController extends Controller
             ],
             'data' => $categoriesReport
         ], 200);
+    }
+
+    public function countOrder()
+    {
+        $today = Order::whereBetween('created_at', [
+            now()->startOfDay(),
+            now()->endOfDay()
+        ])->count();
+
+        $yesterday = Order::whereBetween('created_at', [
+            now()->subDay()->startOfDay(),
+            now()->subDay()->endOfDay()
+        ])->count();
+
+        $result = $this->calculatePercentage($today, $yesterday);
+
+        return response()->json([
+            'title' => 'Total Order',
+            'value' => $today,
+            'persentase' => $result['persentase'],
+            'colour' => $result['colour'],
+            'view' => 'Yesterdey',
+        ]);
+    }
+
+    public function countUser()
+    {
+        $current = User::whereBetween('created_at', [
+            now()->startOfMonth(),
+            now()->endOfMonth()
+        ])->where('role', 'user')->count();
+
+        $previous = User::whereBetween('created_at', [
+            now()->subMonth()->startOfMonth(),
+            now()->subMonth()->endOfMonth()
+        ])->where('role', 'user')->count();
+
+        $result = $this->calculatePercentage($current, $previous);
+
+        return response()->json([
+            'title' => 'Total User',
+            'value' => $current,
+            'persentase' => $result['persentase'],
+            'colour' => $result['colour'],
+            'view' => 'Last Month',
+        ]);
+    }
+
+    public function countPayment()
+    {
+        $current = Payment::whereBetween('created_at', [
+            now()->startOfMonth(),
+            now()->endOfMonth()
+        ])->where('transaction_status', 'settlement')->count();
+
+        $previous = Payment::whereBetween('created_at', [
+            now()->subMonth()->startOfMonth(),
+            now()->subMonth()->endOfMonth()
+        ])->where('transaction_status', 'settlement')->count();
+
+        $result = $this->calculatePercentage($current, $previous);
+
+        return response()->json([
+            'title' => 'Total Transaksi',
+            'value' => $current,
+            'persentase' => $result['persentase'],
+            'colour' => $result['colour'],
+            'view' => 'Last Month',
+        ]);
+    }
+
+    private function calculatePercentage(int|float $current, int|float $previous): array
+    {
+        if ($previous == 0 && $current == 0) {
+            return [
+                'persentase' => '0.00%',
+                'colour' => 'gray',
+            ];
+        }
+        if ($previous == 0 && $current > 0) {
+            return [
+                'persentase' => '+100.00%',
+                'colour' => 'green',
+            ];
+        }
+        $percentage = (($current - $previous) / $previous) * 100;
+        $colour = match (true) {
+            $percentage > 0 => 'green',
+            $percentage < 0 => 'red',
+            default => 'gray',
+        };
+        $sign = $percentage > 0 ? '+' : '';
+
+        return [
+            'persentase' => $sign . number_format($percentage, 2) . '%',
+            'colour' => $colour,
+        ];
     }
 }
