@@ -1,66 +1,119 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📋 Dokumentasi Sistem Backend
+**Arliva Skincare — API, Queue, Payment & Inventaris**
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+## 1. Daftar Endpoint API (Lengkap)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Berikut adalah daftar seluruh endpoint API yang tersedia pada sistem admin Arliva Skincare.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Kategori | Method | Endpoint | Fungsi |
+|----------|--------|----------|--------|
+| Dashboard | `GET` | `/api/admin/dashboard/visit` | Data statistik kunjungan |
+| Dashboard | `GET` | `/api/admin/dashboard/low-stock` | Cek produk stok tipis |
+| Dashboard | `GET` | `/api/admin/dashboard/categories` | Top kategori transaksi |
+| Dashboard | `GET` | `/api/admin/dashboard/stats` | Count Order, User, & Payment |
+| Produk | `GET` `POST` | `/api/admin/product` | List & Tambah Produk |
+| Produk | `GET` `PUT` `DEL` | `/api/admin/product/{slug/id}` | Detail, Update, Hapus Produk |
+| Transaksi | `GET` `POST` | `/api/admin/order` | Kelola data pesanan |
+| Payment | `POST` | `/api/admin/payment/webhook` | Midtrans Callback (Queue handled) |
+| Master | `CRUD` | `/api/admin/faq-category` | Kategori FAQ |
+| Master | `CRUD` | `/api/admin/skin-type` | Tipe kulit |
+| Master | `CRUD` | `/api/admin/result` | Data hasil / media |
+| Logistik | `CRUD` | `/api/admin/shipping-zone` | Zona pengiriman |
+| Logistik | `CRUD` | `/api/admin/zone-region` | Estimasi & wilayah |
+| User | `GET` `POST` | `/api/admin/user` | List & Tambah User (Admin) |
+| User | `GET` `PUT` `DEL` | `/api/admin/user/{id}` | Detail, Update, Hapus User |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 2. Integrasi Payment — Midtrans Webhook
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Sistem menggunakan Webhook untuk menerima notifikasi pembayaran dari Midtrans. Karena proses ini krusial, setiap callback masuk ke dalam Queue agar tidak membebani server saat traffic tinggi.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Alur Kerja
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. Midtrans mengirim data ke endpoint `/api/admin/payment/webhook`
+2. Sistem memvalidasi **signature** dari Midtrans
+3. Job dipicu untuk memperbarui status pesanan menjadi `paid` atau `failed`
+4. Proses update database berjalan di background melalui **Queue Worker**, tidak di main thread HTTP
 
-## Laravel Sponsors
+### Implementasi Queue
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Gunakan `dispatch` berikut agar proses update tidak memblokir response HTTP:
 
-### Premium Partners
+```php
+dispatch(new ProcessPaymentWebhook($request->all()));
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+---
 
-## Contributing
+## 3. Otomatisasi — Console Commands
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Sistem menjalankan scheduled tasks untuk menjaga efisiensi operasional. Daftarkan kedua command di bawah dalam `app/Console/Kernel.php`.
 
-## Code of Conduct
+| Command | Fungsi | Detail |
+|---------|--------|--------|
+| `products:check-low-stock` | Low Stock Alert | Periksa SKU stok `<= 5` (namun `> 0`); kirim email notifikasi ke arlivacosmetics@gmail.com |
+| `orders:auto-complete` | Auto Complete Order | Ubah status pesanan dari **Dikirim** ke **Selesai** jika melewati `estimated_delivery_max` |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Konfigurasi Scheduler (`Kernel.php`)
 
-## Security Vulnerabilities
+```php
+$schedule->command('products:check-low-stock')->daily();
+$schedule->command('orders:auto-complete')->daily();
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Detail: `products:check-low-stock`
 
-## License
+- **Fungsi:** Memeriksa stok SKU yang `<= 5` (namun `> 0`)
+- **Tindakan 1:** Mencatat peringatan ke `Log::warning`
+- **Tindakan 2:** Mengirim email notifikasi ke `arlivacosmetics@gmail.com`
+- **Rekomendasi:** Gunakan `Mail::queue()` agar pengiriman email tidak membuat command hang
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Detail: `orders:auto-complete`
+
+- **Fungsi:** Mengubah status pesanan dari **Dikirim** menjadi **Selesai** jika tanggal saat ini melewati `estimated_delivery_max`
+- **Service:** Menggunakan `OrderCompletionService` untuk memproses logika bisnis terkait perubahan status dan finalisasi transaksi
+- **Error Handling:** Sudah menggunakan `try-catch` di `CompleteExpiredDeliveryOrders`; pastikan logika di `OrderCompletionService` aman terhadap *race condition* dengan **Database Transaction**
+
+---
+
+## 4. Arsitektur Komponen
+
+Gambaran alur data antar komponen utama sistem:
+
+```
+User/Customer
+      │
+      ▼
+API Controller
+      │
+      ▼
+Logic Processor ──────────────────────────────────────────────────────────┐
+      │                                                                    │
+      ▼                                                                    ▼
+Midtrans Webhook                                                 Console Commands
+      │                                                                    │
+      ▼                                                                    ▼
+Queue Worker                                                         Email Queue
+      │                                                                    │
+      ▼                                                                    ▼
+  Database                                                           Mail Server
+```
+
+---
+
+## 5. Tips Implementasi Frontend & Backend
+
+| Aspek | Detail |
+|-------|--------|
+| **Base URL** | Semua endpoint diawali dengan `base_url` (contoh: `http://localhost:8000`) |
+| **Auth Header** | Sertakan `Authorization: Bearer {token}` untuk setiap request (Laravel Sanctum/Passport) |
+| **File Upload** | Untuk endpoint Product, SkinType, dan Result gunakan `Content-Type: multipart/form-data` |
+| **Queue Config** | Atur `QUEUE_CONNECTION=redis` atau `database` di file `.env` |
+| **Error Handling** | Gunakan Database Transaction di `OrderCompletionService` untuk menghindari *race condition* |
+
+---
+
+> **Catatan:** Dokumen ini merupakan gabungan dari dua referensi teknis sistem Arliva Skincare. Selalu pastikan konfigurasi `.env` dan `Kernel.php` diperbarui sebelum deployment ke production.
