@@ -226,6 +226,8 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
         Route::get('/countUser', [DashboardController::class, 'countUser']);
          // card Transaksi
         Route::get('/countPayment', [DashboardController::class, 'countPayment']);
+        // Card Low Stcok
+        Route::get('/lowStock', [DashboardController::class, 'lowStock']);
 
     });
 

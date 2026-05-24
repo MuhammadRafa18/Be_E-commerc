@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\ProductSku;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -56,6 +57,18 @@ class DashboardController extends Controller
         return response()->json([
             'labels' => $result->pluck('label'),
             'data' => $result->pluck('total'),
+        ]);
+    }
+
+    public function lowStock()
+    {
+        $batasMin = 5;
+        $lowStockSkus = ProductSku::with('product')
+            ->where('stock', '<=', $batasMin)
+            ->where('stock', '=', 0)->count();
+        return response()->json([
+            'title' => 'Prodcut Low Stock',
+            'value' => $lowStockSkus
         ]);
     }
 
