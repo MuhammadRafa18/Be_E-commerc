@@ -21,9 +21,7 @@ class ProductController extends Controller
     {
         $this->productService = $productService;
     }
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
 
@@ -37,7 +35,7 @@ class ProductController extends Controller
         ])
             ->latest()
             ->paginate(10);
-            
+
 
         if ($product->isEmpty()) {
             return response()->json(['messages' => 'Produk Not found'], 404);
@@ -45,9 +43,6 @@ class ProductController extends Controller
         return ProductResource::collection($product);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreProductRequest $request)
     {
 
@@ -67,9 +62,7 @@ class ProductController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show($slug)
     {
         $product =  Product::with([
@@ -94,14 +87,12 @@ class ProductController extends Controller
      */
 
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(UpdateProductRequest $request, Product $product)
     {
-   
+
         $data = $request->validated();
-   
+
         if ($request->hasFile('image_produk')) {
             if ($product->image_produk && Storage::disk('public')->exists($product->image_produk)) {
                 Storage::disk('public')->delete($product->image_produk);
@@ -121,9 +112,7 @@ class ProductController extends Controller
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy($id)
     {
         $produk = Product::findOrFail($id);

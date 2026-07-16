@@ -17,6 +17,7 @@ class UserAdmin extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', User::class);
         $User = User::whereIn('role', ['admin', 'super_admin'])
             ->latest()
             ->paginate(10);
@@ -38,6 +39,7 @@ class UserAdmin extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', User::class);
         $validasi = Validator::make($request->all(), [
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',
@@ -70,27 +72,20 @@ class UserAdmin extends Controller
      */
     public function me(Request $request)
     {
+        $this->authorize('view', User::class);
         return $request->user();
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function show(User $User)
-    {
-        return response()->json([
-            'data' => new UserResource($User)
-        ], 200);
-    }
+  
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, User $UserAdmin)
     {
-        $user = $request->user();
+        $this->authorize('update', $UserAdmin);
         $validasi = Validator::make($request->all(), [
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'email' => 'sometimes|email|unique:users,email,' . $UserAdmin->id,
             'password' => 'sometimes|min:8',
             'name' => 'sometimes|string',
             'role' => 'sometimes|in:admin,super_admin',
@@ -126,6 +121,7 @@ class UserAdmin extends Controller
      */
     public function destroy(User $UserAdmin)
     {
+        $this->authorize('delete', $UserAdmin);
         $UserAdmin->tokens()->delete(); 
         $UserAdmin->delete();
         return response()->json([

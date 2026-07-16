@@ -210,6 +210,9 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
 
         // User 
          Route::get('me', [UserAdmin::class, 'me']);
+         Route::get('/UserAdmin', [UserAdmin::class, 'index']);
+         Route::put('/UserAdmin/{UserAdmin}', [UserAdmin::class, 'update']);
+         Route::patch('/UserAdmin/{UserAdmin}', [UserAdmin::class, 'update']);
         // User Client
         Route::get('DataUser', [AdminDataUser::class, 'index']);
         //  Shipping Zone
@@ -237,5 +240,6 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
 Route::middleware(['auth:sanctum', 'role:super_admin'])
     ->prefix('admin')
     ->group(function () {
-        Route::apiResource('UserAdmin', UserAdmin::class);
+        Route::post('/UserAdmin', [UserAdmin::class, 'store']);
+        Route::delete('/UserAdmin/{UserAdmin}', [UserAdmin::class, 'destroy']);
     });
