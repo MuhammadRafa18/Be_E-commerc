@@ -97,6 +97,7 @@ class DashboardController extends Controller
             )
             ->groupBy('category.id', 'category.category')
             ->orderBy('total_revenue', 'DESC')
+            ->limit(5)
             ->get();
         $totalAllRevenue = $categoriesReport->sum('total_revenue');
         return response()->json([
