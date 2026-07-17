@@ -22,6 +22,7 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',ModelsOrder::class);
         $perPage = min($request->input('per_page', 10), 20);
         $Order = ModelsOrder::whereIn('status', [
             'Paid',
@@ -40,6 +41,7 @@ class OrderController extends Controller
 
     public function user(Request $request)
     {
+  
         $user = $request->user();
         $Order = ModelsOrder::where('user_id', $user->id)->latest()->paginate(10);
         if ($Order->isEmpty()) {
@@ -49,11 +51,9 @@ class OrderController extends Controller
     }
 
 
-    public function confirmDone(Request $request, ModelsOrder $order, OrderCompletionService $service)
+    public function confirmDone( ModelsOrder $order, OrderCompletionService $service)
     {
-        if ($order->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized');
-        }
+       $this->authorize('confirm', $order);
         try {
             $order = $service->complete($order);
             return response()->json([
@@ -72,6 +72,7 @@ class OrderController extends Controller
      */
     public function checkout(Request $request)
     {
+        $this->authorize('create',ModelsOrder::class);
         $user = $request->user();
         $validasi = Validator::make($request->all(), [
             'address_id' => 'integer|exists:addres,id',
@@ -112,7 +113,7 @@ class OrderController extends Controller
      */
     public function show(Request $request, $id)
     {
-
+        $this->authorize('view', ModelsOrder::class);
         $order = ModelsOrder::where('id', $id)
             ->where('user_id', $request->user()->id)
             ->firstOrFail();
@@ -126,6 +127,7 @@ class OrderController extends Controller
      */
     public function update(Request $request, ModelsOrder $order)
     {
+        $this->authorize('update',  $order);
 
         $validasi = Validator::make($request->all(), [
             'status' => 'required|in:Diproses,Dikirim',
@@ -162,8 +164,8 @@ class OrderController extends Controller
      */
     public function destroy(Request $request, ModelsOrder $order)
     {
+        $this->authorize('delete', $order);
         $user = $request->user();
-        abort_if($order->user_id !== $user->id, 403);
         if ($order->status !== 'Pending') {
             return response()->json([
                 'message' => 'Order tidak dapat dibatalkan '
