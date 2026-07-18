@@ -22,7 +22,7 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('viewAny',ModelsOrder::class);
+        $this->authorize('viewAny', ModelsOrder::class);
         $perPage = min($request->input('per_page', 10), 20);
         $Order = ModelsOrder::whereIn('status', [
             'Paid',
@@ -41,7 +41,7 @@ class OrderController extends Controller
 
     public function user(Request $request)
     {
-  
+
         $user = $request->user();
         $Order = ModelsOrder::where('user_id', $user->id)->latest()->paginate(10);
         if ($Order->isEmpty()) {
@@ -51,9 +51,9 @@ class OrderController extends Controller
     }
 
 
-    public function confirmDone( ModelsOrder $order, OrderCompletionService $service)
+    public function confirmDone(ModelsOrder $order, OrderCompletionService $service)
     {
-       $this->authorize('confirm', $order);
+        $this->authorize('confirm', $order);
         try {
             $order = $service->complete($order);
             return response()->json([
@@ -72,7 +72,7 @@ class OrderController extends Controller
      */
     public function checkout(Request $request)
     {
-        $this->authorize('create',ModelsOrder::class);
+        $this->authorize('create', ModelsOrder::class);
         $user = $request->user();
         $validasi = Validator::make($request->all(), [
             'address_id' => 'integer|exists:addres,id',
@@ -111,12 +111,9 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request, $id)
-    {
-        $this->authorize('view', ModelsOrder::class);
-        $order = ModelsOrder::where('id', $id)
-            ->where('user_id', $request->user()->id)
-            ->firstOrFail();
+    public function show(Request $request, ModelsOrder $order)
+    {   
+        $this->authorize('view', $order);
         return new OrderResource($order);
     }
 

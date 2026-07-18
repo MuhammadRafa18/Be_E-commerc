@@ -44,7 +44,7 @@ class UserAdmin extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',
             'name' => 'required|string',
-            'role' => 'required|in:admin,superadmin',
+            'role' => 'required|in:admin,super_admin',
             'profile_image' => 'nullable|image|max:2048',
         ]);
         if ($validasi->fails()) {

@@ -49,9 +49,8 @@ class OrderFactory extends Factory
 
             'trackingNumber' => null,
 
-            'estimated_delivery_min' => 2,
-
-            'estimated_delivery_max' => 5,
+            'estimated_delivery_min' => now()->addDays(fake()->numberBetween(1, 3)),
+            'estimated_delivery_max' => now()->addDays(fake()->numberBetween(4, 7)),
 
             'completed_at' => null,
 

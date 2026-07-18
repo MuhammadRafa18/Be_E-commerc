@@ -65,4 +65,12 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function withoutPhone(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'phone' => null,
+            'phone_verified_at' => null,
+        ]);
+    }
 }
