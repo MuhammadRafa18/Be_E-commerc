@@ -112,7 +112,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     // Order
     Route::get('order', [OrderController::class, 'user']);
     Route::post('order', [OrderController::class, 'checkout']);
-    Route::post('order/{id}', [OrderController::class, 'show']);
+    Route::post('order/{order}', [OrderController::class, 'show']);
     Route::post('/order/{order}/confirm-done', [OrderController::class, 'confirmDone']);
     Route::patch('order/cancel/{order}', [OrderController::class, 'destroy']);
 
