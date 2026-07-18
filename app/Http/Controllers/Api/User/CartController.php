@@ -5,24 +5,26 @@ namespace App\Http\Controllers\Api\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCartRequest;
 use App\Http\Resources\Cart as ResourcesCart;
-use App\Models\Cart as ModelsCart;
+use App\Models\Cart;
 use App\Services\Cart\CartService;
 use Illuminate\Http\Request;
 
 
-class Cart extends Controller
+class CartController extends Controller
 {
 
 
     public function index(Request $request)
     {
+        $this->authorize('view', Cart::class);
         $user = $request->user();
-        $cart = ModelsCart::where('user_id', $user->id)->with(
-            'product',
-            'product_sku',
-            'product_skincare',
-            'product_fashion',
-        )
+        $cart = Cart::where('user_id', $user->id)
+            ->with([
+                'product',
+                'product_sku',
+                'product_skincare',
+                'product_fashion',
+            ])
             ->latest()
             ->get();
         if ($cart->isEmpty()) {
@@ -34,15 +36,23 @@ class Cart extends Controller
     }
     public function store(StoreCartRequest $request, CartService $service)
     {
-        
+        $this->authorize('create', Cart::class);
         $user = $request->user();
         try {
             $cart = $service->addToCart($request->validated(), $user);
+            $cart->refresh();
 
+
+            $cart->load([
+                'product',
+                'product_sku',
+                'product_fashion',
+                'product_skincare'
+            ]);
             return response()->json([
                 'message' => 'Cart berhasil ditambah',
                 'data' => new ResourcesCart($cart),
-            ], 200);
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage()
@@ -52,12 +62,13 @@ class Cart extends Controller
 
     public function destroy(Request $request, $id)
     {
+
         $user = $request->user();
 
-        $cart = ModelsCart::where('id', $id)
+        $cart = Cart::where('id', $id)
             ->where('user_id', $user->id)
             ->firstOrFail();
-
+        $this->authorize('delete', $cart);
         $cart->delete();
 
         return response()->json([
@@ -66,12 +77,13 @@ class Cart extends Controller
     }
     public function select(Request $request, $id)
     {
+        $this->authorize('select', Cart::class);
         $user = $request->user();
 
-        $cart = ModelsCart::where('id', $id)
+        $cart = Cart::where('id', $id)
             ->where('user_id', $user->id)
             ->firstOrFail();
-
+        $this->authorize('select', $cart);
         $cart->update([
             'is_selected' => !$cart->is_selected
         ]);

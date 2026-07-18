@@ -22,7 +22,7 @@ use App\Http\Controllers\Api\User\OrderController;
 use App\Http\Controllers\Api\Auth\ResendVerificationController;
 use App\Http\Controllers\Api\Auth\VerificationController;
 use App\Http\Controllers\Api\User\PhoneVertivication;
-use App\Http\Controllers\Api\User\Cart;
+use App\Http\Controllers\Api\User\CartController;
 use App\Http\Controllers\Api\User\ContactController;
 use App\Http\Controllers\Api\User\PaymentController;
 use App\Http\Controllers\Api\User\VisitorController;
@@ -128,10 +128,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('favorite', [FavoriteController::class, 'toggleOn']);
 
     // Cart
-    Route::get('cart', [Cart::class, 'index']);
-    Route::post('cart', [Cart::class, 'store']);
-    Route::delete('cart/delete/{id}', [Cart::class, 'destroy']);
-    Route::post('cart/selected/{id}', [Cart::class, 'select'])->middleware('throttle:20,1');
+    Route::get('cart', [CartController::class, 'index']);
+    Route::post('cart', [CartController::class, 'store']);
+    Route::delete('cart/delete/{id}', [CartController::class, 'destroy']);
+    Route::post('cart/selected/{id}', [CartController::class, 'select'])->middleware('throttle:20,1');
     
 
     // Verif Phone
