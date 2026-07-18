@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductFashion;
 use App\Models\ProductSkincare;
@@ -15,12 +16,14 @@ class ProductSeeder extends Seeder
      */
     public function run()
 {
+    $categoryCelana = Category::where('category', 'Celana')->first()?->id;
+    $categoryFacewash = Category::where('category', 'Facewash')->first()?->id;
     // ==================
     // PRODUCT FASHION
     // ==================
     $fashion = Product::create([
         'title'        => 'Levis',
-        'category_id'  => 4, // fashion
+        'category_id'  => $categoryCelana, // fashion
         'description'  => 'lorem',
         'image_produk' => 'image_produks/dummy-fashion.jpg',
         'image_banner' => 'image_banner/dummy-fashion-banner.jpg',
@@ -54,7 +57,7 @@ class ProductSeeder extends Seeder
     // ==================
     $skincare = Product::create([
         'title'        => 'Facewash Oild',
-        'category_id'  => 2, // skincare
+        'category_id'  => $categoryFacewash, // skincare
         'description'  => 'lorem',
         'image_produk' => 'image_produks/dummy-skincare.jpg',
         'image_banner' => 'image_banner/dummy-skincare-banner.jpg',

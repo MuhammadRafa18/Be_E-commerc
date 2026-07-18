@@ -24,7 +24,7 @@ class ProductController extends Controller
 
     public function index()
     {
-
+    
         $product = Product::query()->with([
             'category:id,category,slug,type',
             'skin_type:id,type',
@@ -45,7 +45,7 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request)
     {
-
+        $this->authorize('create', Product::class);
         $data = $request->validated();
         if ($request->hasFile('image_produk') && $request->hasFile('image_banner')) {
             $data['image_produk'] = $request->file('image_produk')->store('image_produks', 'public');
@@ -65,6 +65,7 @@ class ProductController extends Controller
 
     public function show($slug)
     {
+       
         $product =  Product::with([
             'category:id,category,slug,type',
             'skin_type:id,type',
@@ -72,11 +73,6 @@ class ProductController extends Controller
             'product_sku.skincare:id,product_sku_id,size,use_produk,ingredient',
             'product_sku.attribute:id,product_sku_id,size,color',
         ])->where('slug', $slug)->firstOrFail();
-        if (!$product) {
-            return response()->json([
-                'message' => 'Produk Not Found'
-            ], 404);
-        }
         return response()->json([
             'data' => new ProductResource($product)
         ], 200);
@@ -90,7 +86,7 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, Product $product)
     {
-
+        $this->authorize('update', $product);
         $data = $request->validated();
 
         if ($request->hasFile('image_produk')) {
@@ -106,6 +102,7 @@ class ProductController extends Controller
             $data['image_banner'] = $request->file('image_banner')->store('image_banners', 'public');
         }
         $this->productService->update($data, $product);
+        $product->refresh();
         return response()->json([
             'messages' => 'Produk berhasil diupdate',
             'data' => new ProductResource($product)
@@ -116,7 +113,7 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $produk = Product::findOrFail($id);
-
+        $this->authorize('delete', $produk);
         $usedInOrder = OrderItem::where('product_id', $id)->exists();
 
         if ($usedInOrder) {
@@ -125,11 +122,11 @@ class ProductController extends Controller
             ], 409);
         }
 
-        if ($produk->imageproduk && Storage::disk('public')->exists($produk->imageproduk)) {
-            Storage::disk('public')->delete($produk->imageproduk);
+        if ($produk->image_produk && Storage::disk('public')->exists($produk->image_produk)) {
+            Storage::disk('public')->delete($produk->image_produk);
         }
-        if ($produk->imagebanner && Storage::disk('public')->exists($produk->imagebanner)) {
-            Storage::disk('public')->delete($produk->imagebanner);
+        if ($produk->image_banner && Storage::disk('public')->exists($produk->image_banner)) {
+            Storage::disk('public')->delete($produk->image_banner);
         }
         $produk->skin_type()->detach($produk->skin_type_id);
         $produk->delete();

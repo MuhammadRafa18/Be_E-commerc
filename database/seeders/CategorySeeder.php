@@ -32,7 +32,7 @@ class CategorySeeder extends Seeder
             ],
         ];
         foreach ($categories as $cat) {
-            Category::create($cat); // slug otomatis dari boot()
+            Category::create($cat); 
         }
     }
 }

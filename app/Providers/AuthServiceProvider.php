@@ -2,9 +2,19 @@
 
 namespace App\Providers;
 
+use App\Models\Addres;
+use App\Models\Cart;
+use App\Models\Favorite;
 use App\Models\Order;
+use App\Models\Payment;
+use App\Models\Product;
 use App\Models\User;
+use App\Policies\AddressPolicy;
+use App\Policies\CartPolicy;
+use App\Policies\FavoritePolicy;
 use App\Policies\OrderPolicy;
+use App\Policies\PaymentPolicy;
+use App\Policies\ProductPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -21,6 +31,11 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         User::class => UserPolicy::class,
         Order::class => OrderPolicy::class,
+        Product::class => ProductPolicy::class,
+        Payment::class => PaymentPolicy::class,
+        Cart::class => CartPolicy::class,
+        Addres::class => AddressPolicy::class,
+        Favorite::class => FavoritePolicy::class,
     ];
 
     /**
