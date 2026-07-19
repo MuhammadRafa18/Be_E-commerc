@@ -12,8 +12,15 @@ class FavoriteController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('view', Favorite::class);
         $user = $request->user();
-        $favorites = Favorite::with('product')
+        $favorites = Favorite::with([
+            'product:id,category_id,image_produk,title',
+            'product.category:id,type',
+            'product.product_sku:id,product_id,price,sell_price,stock',
+            'product.product_sku.attribute:id,product_sku_id,size,color',
+            'product.product_sku.skincare:id,product_sku_id,size,use_produk'
+        ])
             ->where('user_id', $user->id)->latest()
             ->get();
         if ($favorites->isEmpty()) {
@@ -25,6 +32,7 @@ class FavoriteController extends Controller
     }
     public function toggleOn(Request $request)
     {
+        $this->authorize('create', Favorite::class);
         $user = $request->user();
         $validator = $request->validate([
             'product_id' => 'required|exists:product,id'

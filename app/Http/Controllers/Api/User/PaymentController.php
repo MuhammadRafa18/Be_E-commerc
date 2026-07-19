@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Mail\NewOrderNotification;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Mail;
 
 
@@ -19,6 +20,7 @@ class PaymentController extends Controller
 
     public function create(Request $request, $OrderId)
     {
+        $this->authorize('create', Payment::class);
         $user = $request->user();
 
 
@@ -31,7 +33,9 @@ class PaymentController extends Controller
             }
 
             if ($order->status !== 'Pending') {
-                return response()->json(['message' => 'Order tidak bisa dibayar'], 422);
+                throw new HttpResponseException(response()->json([
+                    'message' => 'Order tidak bisa dibayar'
+                ], 422));
             }
             $existingPayment = $order->payments()
                 ->where('transaction_status', 'Pending')
@@ -111,11 +115,13 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Invalid signature'], 403);
         }
 
-        $payment = Payment::where('midtrans_order_id', $payload['order_id'])->firstOrFail();
+        $payment = Payment::where('midtrans_order_id', $payload['order_id'])
+            ->with('order.zones_region')
+            ->firstOrFail();
 
 
         if (in_array($payment->transaction_status, ['settlement', 'capture'])) {
-            return response()->json(['message' => 'Already processed']);
+            return response()->json(['message' => 'Already processed'], 200);
         }
 
         $transactionStatus = $payload['transaction_status'];

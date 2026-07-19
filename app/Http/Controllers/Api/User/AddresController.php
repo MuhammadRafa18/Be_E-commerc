@@ -15,6 +15,7 @@ class AddresController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Addres::class);
         $user = $request->user();
         $addre = Addres::where('user_id', $user->id)->get();
         if ($addre->isEmpty()) {
@@ -35,6 +36,7 @@ class AddresController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Addres::class);
         $validator = Validator::make($request->all(), [
             'fullname' => 'required|string|max:255',
             'streetname' => 'required|string|max:255',
@@ -72,11 +74,13 @@ class AddresController extends Controller
      */
     public function show(Request $request, $id)
     {
+
         $user = $request->user();
 
         $address = Addres::where('id', $id)
             ->where('user_id', $user->id)
             ->firstOrFail();
+        $this->authorize('view', $address);
         return response()->json(['data' => new AddresResource($address)], 200);
     }
 
@@ -90,6 +94,7 @@ class AddresController extends Controller
      */
     public function update(Request $request, $id)
     {
+
         $data = $request->validate([
             'fullname' => 'sometimes|string|max:255',
             'streetname' => 'sometimes|string|max:255',
@@ -98,6 +103,7 @@ class AddresController extends Controller
             'city' => 'sometimes|string|max:255'
         ]);
         $addres = Addres::where('id', $id)->where('user_id', $request->user()->id)->firstOrFail();
+        $this->authorize('update', $addres);
         $addres->update($data);
         return response()->json([
             'messages' => 'Alamat Berhasil diupdate',
@@ -111,7 +117,9 @@ class AddresController extends Controller
     public function destroy(Request $request, $id)
     {
 
+
         $addres = Addres::where('id', $id)->where('user_id', $request->user()->id)->firstOrFail();
+        $this->authorize('delete', $addres);
         $addres->delete();
         return response()->json([
             'messages' => 'Alamat berhasil dihapus',
