@@ -7,9 +7,9 @@ use App\Models\User;
 
 class FavoritePolicy
 {
-     public function view(User $user, Favorite $favorite): bool
+     public function view(User $user): bool
     {
-        return $user->role === 'user' && $favorite->user_id === $user->id;
+        return $user->role === 'user';
     }
 
     /**
@@ -20,21 +20,7 @@ class FavoritePolicy
         return $user->role === 'user';
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function select(User $user, Favorite $favorite): bool
-    {
+   
 
-
-        return $user->role === 'user' && $favorite->user_id === $user->id;
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Favorite $favorite): bool
-    {
-        return $user->role === 'user' && $favorite->user_id === $user->id;
-    }
+   
 }

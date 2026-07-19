@@ -14,6 +14,7 @@ class CartPolicy
     {
         return $user->role === 'user';
     }
+    
 
     /**
      * Determine whether the user can create models.
