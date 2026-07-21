@@ -10,53 +10,91 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
     public function indexVisit(Request $request)
     {
-        $range = $request->query('range', 'today');
-        $query = DB::table('visitor');
-
+        $range = $request->query('range', 'week');
+        $today = Carbon::today()->toDateString();
         switch ($range) {
-            case 'today':
-                $query->whereDate('created_at', Carbon::today())
-                    ->selectRaw('HOUR(created_at) as label, COUNT(*) as total')
-                    ->groupBy('label')
-                    ->orderBy('label');
+            case 'week':
+                $historical = DB::table('daily_visitor_stats')
+                    ->whereBetween('date', [
+                        Carbon::now()->subDays(6)->toDateString(),
+                        Carbon::yesterday()->toDateString()
+                    ])
+                    ->selectRaw('DATE_FORMAT(date, "%Y-%m-%d") as label, total_visitors as total')
+                    ->orderBy('date', 'ASC')
+                    ->get();
+                $todayCount = DB::table('visitor')
+                    ->whereDate('created_at', $today)
+                    ->count();
+                $result = $historical->push([
+                    'label' => $today,
+                    'total' => $todayCount
+                ]);
                 break;
 
-            case 'week':
-                $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-                    ->selectRaw('DATE(created_at) as label, COUNT(*) as total')
-                    ->groupBy('label')
-                    ->orderBy('label');
-                break;
             case 'month':
-                $query->whereMonth('created_at', Carbon::now()->month)
-                    ->whereYear('created_at', Carbon::now()->year)
-                    ->selectRaw('DATE (created_at) as label, COUNT(*) as total')
-                    ->groupBy('label')
-                    ->orderBy('label');
+                $historical = DB::table('daily_visitor_stats')
+                    ->whereMonth('date', Carbon::now()->month)
+                    ->whereYear('date', Carbon::now()->year)
+                    ->where('date', '<', $today)
+                    ->selectRaw('DATE_FORMAT(date, "%Y-%m-%d") as label, total_visitors as total')
+                    ->orderBy('date', 'ASC')
+                    ->get();
+
+
+                $todayCount = DB::table('visitor')
+                    ->whereDate('created_at', $today)
+                    ->count();
+
+
+                $result = $historical->push([
+                    'label' => $today,
+                    'total' => $todayCount
+                ]);
                 break;
+
             case 'years':
-                $query->whereYear('created_at', Carbon::now()->year)
-                    ->selectRaw('MONTH(created_at) as label, COUNT(*) as total')
-                    ->groupBy('label')
-                    ->orderBy('label');
+
+                $historical = DB::table('daily_visitor_stats')
+                    ->whereYear('date', Carbon::now()->year)
+                    ->whereMonth('date', '<', Carbon::now()->month) 
+                    ->selectRaw('DATE_FORMAT(date, "%M") as label, SUM(total_visitors) as total, MONTH(date) as month_num')
+                    ->groupBy('label', 'month_num')
+                    ->orderBy('month_num', 'ASC')
+                    ->get();
+
+        
+                $thisMonthStats = DB::table('daily_visitor_stats')
+                    ->whereYear('date', Carbon::now()->year)
+                    ->whereMonth('date', Carbon::now()->month)
+                    ->sum('total_visitors');
+
+                $todayCount = DB::table('visitor')
+                    ->whereDate('created_at', $today)
+                    ->count();
+
+                $currentMonthTotal = $thisMonthStats + $todayCount;
+                $currentMonthLabel = Carbon::now()->translatedFormat('F');
+
+               
+                $result = collect($historical)->push([
+                    'label' => $currentMonthLabel,
+                    'total' => (int) $currentMonthTotal
+                ]);
                 break;
 
             default:
-                return response()->json([
-                    'error' => 'Invalid range'
-                ], 400);
+                return response()->json(['error' => 'Invalid range'], 400);
         }
 
-        $result = $query->get();
         return response()->json([
-            'labels' => $result->pluck('label'),
-            'data' => $result->pluck('total'),
+            'labels' => collect($result)->pluck('label'),
+            'data'   => collect($result)->pluck('total'),
         ]);
     }
 
@@ -77,38 +115,44 @@ class DashboardController extends Controller
         $filter = $request->query('filter', 'week');
         $now = Carbon::now();
         $startDate = match ($filter) {
-            'week'  => Carbon::now()->subDays(7),
-            'month' => $now->startOfMonth()->toDateTimeString(),
-            'year'  => $now->startOfYear()->toDateTimeString(),
-            default => Carbon::now()->subDays(7),
+            'week'  => Carbon::now()->subDays(7)->toDateTimeString(),
+            'month' => $now->copy()->startOfMonth()->toDateTimeString(),
+            'years'  => $now->copy()->startOfYear()->toDateTimeString(),
+            default => Carbon::now()->subDays(7)->toDateTimeString(),
         };
-
-        $categoriesReport = DB::table('orders')
-            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-            ->join('product', 'order_items.product_id', '=', 'product.id')
-            ->join('category', 'product.category_id', '=', 'category.id')
-            ->where('orders.status', 'Selesai')
-            ->where('orders.completed_at', '>=', $startDate)
-            ->select(
-                'category.id as categories_id',
-                'category.category as categories_name',
-                DB::raw('SUM(order_items.subtotal) as total_revenue'),
-                DB::raw('SUM(order_items.qty) as total_qty_sold')
-            )
-            ->groupBy('category.id', 'category.category')
-            ->orderBy('total_revenue', 'DESC')
-            ->limit(5)
-            ->get();
-        $totalAllRevenue = $categoriesReport->sum('total_revenue');
+        $cacheKey = "top_categories_report_{$filter}";
+        $reportData = Cache::remember($cacheKey, 600, function () use ($startDate) {
+            $categoriesReport = DB::table('orders')
+                ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                ->join('product', 'order_items.product_id', '=', 'product.id')
+                ->join('category', 'product.category_id', '=', 'category.id')
+                ->where('orders.status', 'Selesai')
+                ->where('orders.completed_at', '>=', $startDate)
+                ->select(
+                    'category.id as categories_id',
+                    'category.category as categories_name',
+                    DB::raw('SUM(order_items.subtotal) as total_revenue'),
+                    DB::raw('SUM(order_items.qty) as total_qty_sold')
+                )
+                ->groupBy('category.id', 'category.category')
+                ->orderBy('total_revenue', 'DESC')
+                ->limit(5)
+                ->get();
+            $totalAllRevenue = $categoriesReport->sum('total_revenue');
+            return [
+                'categories' => $categoriesReport,
+                'total_revenue' => $totalAllRevenue,
+            ];
+        });
         return response()->json([
             'status' => 'success',
             'message' => 'Data top transaksi berhasil diambil',
             'meta' => [
                 'filter_used' => $filter,
                 'start_date' => $startDate,
-                'total_all_category_revenue' => $totalAllRevenue
+                'total_all_category_revenue' => $reportData['total_revenue']
             ],
-            'data' => $categoriesReport
+            'data' => $reportData['categories']
         ], 200);
     }
 
