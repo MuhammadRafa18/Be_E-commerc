@@ -16,7 +16,7 @@ class Faq_category extends Controller
      */
     public function index()
     {
-        $Faq_category = ModelsFaq::orderBy('created_at', 'desc')->get();
+        $Faq_category = ModelsFaq::orderBy('created_at', 'desc')->paginate(10);
         if ($Faq_category->isEmpty()) {
             return response()->json([
                 'message' => 'Faq Category not Found',

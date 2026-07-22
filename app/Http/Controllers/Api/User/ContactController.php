@@ -14,7 +14,7 @@ class ContactController extends Controller
      */
     public function index()
     {
-        $contact = Contact::orderBy('created_at', 'desc')->get();
+        $contact = Contact::orderBy('created_at', 'desc')->paginate(10);
         if ($contact->isEmpty()) {
             return response()->json([
                 "message" => "Message Not Found"
