@@ -22,7 +22,7 @@ class FavoriteController extends Controller
             'product.product_sku.skincare:id,product_sku_id,size,use_produk'
         ])
             ->where('user_id', $user->id)->latest()
-            ->get();
+            ->paginate(5);
         if ($favorites->isEmpty()) {
             return response()->json([
                 'messages' => 'Favorite  not found'
