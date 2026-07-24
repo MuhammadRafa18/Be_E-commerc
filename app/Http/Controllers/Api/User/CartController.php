@@ -53,6 +53,8 @@ class CartController extends Controller
                 'message' => 'Cart berhasil ditambah',
                 'data' => new ResourcesCart($cart),
             ], 201);
+        } catch (\Illuminate\Http\Exceptions\HttpResponseException $e) {
+            throw $e;
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage()
@@ -77,13 +79,16 @@ class CartController extends Controller
     }
     public function select(Request $request, $id)
     {
-        $this->authorize('select', Cart::class);
         $user = $request->user();
 
         $cart = Cart::where('id', $id)
             ->where('user_id', $user->id)
             ->firstOrFail();
+
         $this->authorize('select', $cart);
+
+
+
         $cart->update([
             'is_selected' => !$cart->is_selected
         ]);
