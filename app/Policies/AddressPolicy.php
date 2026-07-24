@@ -7,7 +7,7 @@ use App\Models\User;
 
 class AddressPolicy
 {
-       public function viewAny(User $user, Addres $addres): bool
+       public function viewAny(User $user): bool
     {
          return $user->role === 'user';
     }
