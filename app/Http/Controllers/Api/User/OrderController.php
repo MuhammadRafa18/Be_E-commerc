@@ -23,7 +23,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', ModelsOrder::class);
-        $perPage = min($request->input('per_page', 10), 20);
+        $perPage = min($request->input('per_page', 5), 7);
         $Order = ModelsOrder::whereIn('status', [
             'Paid',
             'Diproses',

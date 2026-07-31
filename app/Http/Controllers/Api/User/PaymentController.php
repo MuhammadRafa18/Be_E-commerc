@@ -8,7 +8,7 @@ use App\Http\Requests\Payment\StorePaymentRequest;
 
 use App\Models\Payment;
 
-use App\Services\Cart\PaymentService;
+use App\Services\Payment\PaymentService;
 
 
 

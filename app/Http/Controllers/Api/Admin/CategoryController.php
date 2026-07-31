@@ -16,7 +16,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $category = Category::orderBy('created_at', 'desc')->get();
+        $category = Category::orderBy('created_at', 'desc')->paginate(10);
         if ($category->isEmpty()) {
             return response()->json(['message' => 'Category not Found'], 404);
         }

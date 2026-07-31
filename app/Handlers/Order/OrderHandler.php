@@ -29,6 +29,7 @@ class OrderHandler implements OrderHandlerInterface
             throw new \Exception('Region tidak ditemukan');
         }
         $ongkir = $region->shipping_zone->price;
+        
 
 
         return DB::transaction(function () use ($user, $region, $addres, $ongkir) {
@@ -47,6 +48,7 @@ class OrderHandler implements OrderHandlerInterface
             if ($carts->isEmpty()) {
                 throw new \Exception('Pilih produk dulu', 422);
             }
+            
             $subtotal = 0;
             $diskon  = 0;
             foreach ($carts as $item) {
@@ -57,7 +59,7 @@ class OrderHandler implements OrderHandlerInterface
                 }
 
                 $subtotal += $item->product_sku->sell_price * $item->qty;
-                $diskon += ($item->product_sku->price - $item->product_sku->sell_price) * $item->qty;
+                $diskon += ($item->product_sku->sell_price - $item->product_sku->price) * $item->qty;
             }
 
 

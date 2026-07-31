@@ -13,7 +13,7 @@ class ZoneRegion extends Controller
     {
         $zoneRegion = ModelsZoneRegion::with(['shipping_zone:id,name,price'])
             ->latest()
-            ->get();
+            ->paginate(10);
             // dd($zoneRegion);
         if ($zoneRegion->isEmpty()) {
             return response()->json(['messages' => 'Zone Region Not found'], 404);

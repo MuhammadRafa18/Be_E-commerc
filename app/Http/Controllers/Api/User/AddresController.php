@@ -17,7 +17,7 @@ class AddresController extends Controller
     {
         $this->authorize('viewAny', Addres::class);
         $user = $request->user();
-        $addre = Addres::where('user_id', $user->id)->get();
+        $addre = Addres::where('user_id', $user->id)->paginate(3);
         if ($addre->isEmpty()) {
             return response()->json([
                 'messages' => "Address Not Found"

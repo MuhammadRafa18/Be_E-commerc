@@ -13,7 +13,7 @@ class DetailFaq extends Controller
     public function index()
     {
         $detail_faq = ModelsDetailFaq::with('faq_category:id,category,slug')
-        ->orderBy('created_at', 'desc')->paginate(10);
+        ->orderBy('created_at', 'desc')->get();
 
         if ($detail_faq->isEmpty()) {
             return response()->json([
