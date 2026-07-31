@@ -16,7 +16,7 @@ class SkinTypes extends Controller
      */
     public function index()
     {
-        $Skin_type = SkinType::orderBy('created_at', 'desc')->get();
+        $Skin_type = SkinType::orderBy('created_at', 'desc')->paginate(10);
         if ($Skin_type->isEmpty()) {
             return response()->json([
                 'message' => 'Skin Type not Found',

@@ -16,7 +16,7 @@ class Result extends Controller
      */
     public function index()
     {
-        $Result = ModelsResult::orderBy('created_at', 'desc')->get();
+        $Result = ModelsResult::orderBy('created_at', 'desc')->paginate(10);
         if ($Result->isEmpty()) {
             return response()->json(['message' => 'Result not Found'], 404);
         }

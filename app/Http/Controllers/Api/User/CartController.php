@@ -26,7 +26,7 @@ class CartController extends Controller
                 'product_fashion',
             ])
             ->latest()
-            ->get();
+            ->paginate(5);
         if ($cart->isEmpty()) {
             return response()->json([
                 'messages' => "Cart Not Found"

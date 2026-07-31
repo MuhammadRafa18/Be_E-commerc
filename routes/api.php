@@ -73,6 +73,7 @@ Route::post('register', [AdminDataUser::class, 'register']);
 // Produk
 Route::get('product', [ProductController::class, 'index']);
 Route::post('product/{slug}', [ProductController::class, 'show']);
+Route::post('product/show/{id}', [ProductController::class, 'showwithId']);
 // Faq Category
 Route::get('Faq_category', [Faq_category::class, 'index']);
 // Visitor

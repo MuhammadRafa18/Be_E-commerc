@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Services\Payment;
+
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
@@ -25,8 +27,17 @@ class MidtransGateway
                 'phone' => $user->phone ?? '0857241566',
             ],
         ];
+        try {
+            $token = Snap::getSnapToken($params);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Midtrans Error',
+                'error' => $e->getMessage(),
+                'params' => $params,
+            ], 500);
+        }
 
-        $token = Snap::getSnapToken($params);
+
 
         $payment->update([
             'payload' => $params

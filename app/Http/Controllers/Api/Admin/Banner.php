@@ -17,7 +17,7 @@ class Banner extends Controller
      */
     public function index()
     {
-        $Banner = ModelsBanner::orderBy('created_at','desc')->get();
+        $Banner = ModelsBanner::orderBy('created_at','desc')->paginate(10);
         if ($Banner->isEmpty()) {
           return response()->json(['message' => 'Banner not Found'], 404);
         } 

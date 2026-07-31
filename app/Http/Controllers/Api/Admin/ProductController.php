@@ -77,6 +77,21 @@ class ProductController extends Controller
             'data' => new ProductResource($product)
         ], 200);
     }
+    
+    public function showwithId($id)
+    {
+       
+        $product =  Product::with([
+            'category:id,category,slug,type',
+            'skin_type:id,type',
+            'product_sku:id,product_id,price,sell_price,stock,weight_gram',
+            'product_sku.skincare:id,product_sku_id,size,use_produk,ingredient',
+            'product_sku.attribute:id,product_sku_id,size,color',
+        ])->where('id', $id)->firstOrFail();
+        return response()->json([
+            'data' => new ProductResource($product)
+        ], 200);
+    }
 
     /**
      * Show the form for editing the specified resource.

@@ -11,7 +11,7 @@ class ShippingZone extends Controller
 {
     public function index()
     {
-        $shipping_zone = ModelsShippingZone::orderBy('created_at', 'desc')->get();
+        $shipping_zone = ModelsShippingZone::orderBy('created_at', 'desc')->paginate(10);
         if ($shipping_zone->isEmpty()) {
             return response()->json([
                 'data' => "Shipping Zone Not Found"

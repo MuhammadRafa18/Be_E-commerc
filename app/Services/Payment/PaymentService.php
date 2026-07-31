@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Cart;
+namespace App\Services\Payment;
 
 use App\Mail\NewOrderNotification;
 use App\Models\Order;
@@ -9,8 +9,8 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Services\Payment\MidtransGateway;
 
-use MidtransGateway;
 
 class PaymentService
 {

@@ -2,6 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Models\Addres;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductFashion;
+use App\Models\ProductSkincare;
+use App\Models\ProductSku;
+use App\Models\ShippingZone;
+use App\Models\SkinType;
+use App\Models\ZoneRegion;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,6 +22,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $seeders = [
+          
             UserSeeder::class,      
             AddresSeeder::class,   
             CategorySeeder::class,   
@@ -22,7 +32,6 @@ class DatabaseSeeder extends Seeder
             ZoneSeeder::class,
         ];
 
-        // Eksekusi semua seeder sesuai urutan array di atas
         $this->call($seeders);
     }
 }
