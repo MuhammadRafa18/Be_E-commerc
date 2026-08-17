@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\FavoriteResource;
 use App\Models\Favorite;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Cache;
 
 class FavoriteController extends Controller
 {
@@ -14,15 +14,18 @@ class FavoriteController extends Controller
     {
         $this->authorize('view', Favorite::class);
         $user = $request->user();
-        $favorites = Favorite::with([
-            'product:id,category_id,image_produk,title',
-            'product.category:id,type',
-            'product.product_sku:id,product_id,price,sell_price,stock',
-            'product.product_sku.attribute:id,product_sku_id,size,color',
+        $cacheKey = "favorites_user_{$user->id}_page_" . $request->get('page', 1);
+        $favorites = Cache::remember($cacheKey, 3600, function () use ($user, $request) {
+            return Favorite::with([
+                'product:id,category_id,image_produk,title',
+                'product.category:id,type',
+                'product.product_sku:id,product_id,price,sell_price,stock',
+                'product.product_sku.attribute:id,product_sku_id,size,color',
             'product.product_sku.skincare:id,product_sku_id,size,use_produk'
         ])
             ->where('user_id', $user->id)->latest()
             ->paginate(5);
+        });
         if ($favorites->isEmpty()) {
             return response()->json([
                 'messages' => 'Favorite  not found'
@@ -47,6 +50,7 @@ class FavoriteController extends Controller
 
         if ($favorite) {
             $favorite->delete();
+            Cache::forget("favorites_user_{$user->id}_page_" . $request->get('page', 1));
             return response()->json(['status' => 'unliked']);
         }
 
@@ -54,7 +58,7 @@ class FavoriteController extends Controller
             'user_id' => $user->id,
             'product_id' => $validator['product_id'],
         ]);
-
+        Cache::forget("favorites_user_{$user->id}_page_" . $request->get('page', 1));
         return response()->json(['status' => 'liked'], 201);
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\SkinTypesResource;
 use App\Models\SkinType;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class SkinTypes extends Controller
@@ -16,7 +17,10 @@ class SkinTypes extends Controller
      */
     public function index()
     {
-        $Skin_type = SkinType::orderBy('created_at', 'desc')->paginate(10);
+        $cacheKey = 'skin_types_page_' . request()->get('page', 1);
+        $Skin_type = Cache::remember($cacheKey, 3600, function () {
+            return SkinType::orderBy('created_at', 'desc')->paginate(10);
+        });
         if ($Skin_type->isEmpty()) {
             return response()->json([
                 'message' => 'Skin Type not Found',

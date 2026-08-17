@@ -6,15 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ZoneRegion as ResourcesZoneRegion;
 use App\Models\ZoneRegion as ModelsZoneRegion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ZoneRegion extends Controller
 {
     public function index()
     {
-        $zoneRegion = ModelsZoneRegion::with(['shipping_zone:id,name,price'])
-            ->latest()
-            ->paginate(10);
-            // dd($zoneRegion);
+        $cacheKey = 'zone_regions_page_' . request()->get('page', 1);
+        $zoneRegion = Cache::remember($cacheKey, 3600, function () {
+            return ModelsZoneRegion::with(['shipping_zone:id,name,price'])
+                ->latest()
+                ->paginate(10);
+        });
         if ($zoneRegion->isEmpty()) {
             return response()->json(['messages' => 'Zone Region Not found'], 404);
         }

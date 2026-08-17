@@ -18,7 +18,7 @@ class MidtransGateway
         $params = [
 
             'transaction_details' => [
-                'order_id' => $order->midtrans_order_id,
+                'order_id' => $payment->midtrans_order_id,
                 'gross_amount' => $order->total,
             ],
             'customer_details' => [

@@ -6,14 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\DetailFaq as ResourcesDetailFaq;
 use App\Models\DetailFaq as ModelsDetailFaq;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class DetailFaq extends Controller
 {
     public function index()
     {
-        $detail_faq = ModelsDetailFaq::with('faq_category:id,category,slug')
-        ->orderBy('created_at', 'desc')->get();
+        $cacheKey = 'detail_faq';
+        $detail_faq = Cache::remember($cacheKey, 3600, function () {
+            return ModelsDetailFaq::with('faq_category:id,category,slug')
+                ->orderBy('created_at', 'desc')->get();
+        });
 
         if ($detail_faq->isEmpty()) {
             return response()->json([
@@ -37,6 +41,7 @@ class DetailFaq extends Controller
         }
         $data = $validator->validate();
         $detail_faq = ModelsDetailFaq::create($data);
+        Cache::forget('detail_faq');
         return response()->json([
             'messages' => 'Data Berhasil Ditambahkan',
             'data' => new ResourcesDetailFaq($detail_faq)
@@ -44,7 +49,10 @@ class DetailFaq extends Controller
     }
     public function show($slug)
     {
-        $detail_faq = ModelsDetailFaq::with('faq_category')->where('slug', $slug)->firstOrFail();
+        $cacheKey = "detail_faq_{$slug}";
+        $detail_faq = Cache::remember($cacheKey, 3600, function () use ($slug) {
+            return ModelsDetailFaq::with('faq_category')->where('slug', $slug)->firstOrFail();
+        });
         return response()->json([
             'data' => new ResourcesDetailFaq($detail_faq)
         ], 200);
@@ -63,6 +71,7 @@ class DetailFaq extends Controller
         }
         $data = $validator->validate();
         $detail_faq->update($data);
+        Cache::forget('detail_faq');
         return response()->json([
             'messages' => 'Data Berhasil Diupdate',
             'data' => new ResourcesDetailFaq($detail_faq)
@@ -70,6 +79,7 @@ class DetailFaq extends Controller
     }
     public function destroy(ModelsDetailFaq $detail_faq)
     {
+        Cache::forget('detail_faq');
         if (empty($detail_faq)) {
             return response()->json([
                 'succes' => true,

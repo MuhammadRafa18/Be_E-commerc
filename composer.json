@@ -13,8 +13,7 @@
         "laravel/socialite": "^5.24",
         "laravel/tinker": "^2.8",
         "midtrans/midtrans-php": "^2.6",
-        "php-open-source-saver/jwt-auth": "^2.3",
-        "tymon/jwt-auth": "^2.2"
+        "predis/predis": "^3.6"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",

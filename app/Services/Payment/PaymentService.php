@@ -27,7 +27,7 @@ class PaymentService
 
          if ($order->status !== 'Pending') {
             throw new HttpResponseException(response()->json([
-               'message' => 'Order tidak bisa dibayar'
+               'message' => 'Order cannot be paid',
             ], 422));
          }
          $existingPayment = $order->payments()
@@ -120,7 +120,7 @@ class PaymentService
          $order = $payment->order;
 
          if (in_array($transactionStatus, ['capture', 'settlement'])) {
-            if ($order->status !== 'Paid') {
+            if ($order->status === 'Paid') {
                return [
                   'message' => 'Already processed'
                ];

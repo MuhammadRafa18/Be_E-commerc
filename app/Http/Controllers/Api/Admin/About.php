@@ -6,14 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\About as ResourcesAbout;
 use App\Models\About as ModelsAbout;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class About extends Controller
 {
     public function index()
-    {
-        $about = ModelsAbout::with('powers')->orderBy('created_at', 'desc')->get();
+    {   
+        $cacheKey = 'about';
+        $about = Cache::remember($cacheKey, 3600, function () {
+            return ModelsAbout::with('powers')->orderBy('created_at', 'desc')->get();
+        });
         if ($about->isEmpty()) {
             return response()->json([
                 'message' => 'About Not Found'
@@ -23,6 +27,7 @@ class About extends Controller
     }
     public function store(Request $request)
     {
+     
         if (ModelsAbout::count() > 0) {
             return response()->json([
                 'success' => false,
@@ -77,7 +82,7 @@ class About extends Controller
                 ]);
             }
         }
-
+        Cache::forget('about');
 
         return response()->json([
             'message' => 'About berhasil dibuat',
@@ -87,7 +92,10 @@ class About extends Controller
 
     public function show($slug)
     {
-        $about = ModelsAbout::with('powers')->where('slug', $slug)->firstOrFail();
+        $cacheKey = "about_{$slug}";
+        $about = Cache::remember($cacheKey, 3600, function () use ($slug) {
+            return ModelsAbout::with('powers')->where('slug', $slug)->firstOrFail();
+        });
         return response()->json([
             'data'    => new ResourcesAbout($about)
         ], 200);
@@ -184,6 +192,7 @@ class About extends Controller
                 }
             }
         }
+            Cache::forget('about');
         return response()->json([
             'message' => 'About berhasil diupadte',
             'data' => new ResourcesAbout($about)
@@ -207,6 +216,8 @@ class About extends Controller
         $about->powers()->delete();
 
         $about->delete();
+            Cache::forget('about');
+
         return response()->json([
             'message' => 'About berhasil dihapus'
         ], 200);

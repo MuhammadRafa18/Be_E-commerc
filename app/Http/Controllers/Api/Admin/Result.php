@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ResultResource;
 use App\Models\Result as ModelsResult;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,8 +16,11 @@ class Result extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $Result = ModelsResult::orderBy('created_at', 'desc')->paginate(10);
+    {   
+        $cacheKey = 'results_page_' . request()->get('page', 1);    
+        $Result = Cache::remember($cacheKey, 3600, function () {
+            return ModelsResult::orderBy('created_at', 'desc')->paginate(10);
+        });
         if ($Result->isEmpty()) {
             return response()->json(['message' => 'Result not Found'], 404);
         }

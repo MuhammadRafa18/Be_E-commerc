@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\FaqCategoryResource;
 use App\Models\Faq_category as ModelsFaq;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -16,7 +17,10 @@ class Faq_category extends Controller
      */
     public function index()
     {
-        $Faq_category = ModelsFaq::orderBy('created_at', 'desc')->paginate(10);
+        $cacheKey = 'faq_categories_page_' . request()->get('page', 1);
+        $Faq_category = Cache::remember($cacheKey, 3600, function () {
+            return ModelsFaq::orderBy('created_at', 'desc')->paginate(10);
+        });
         if ($Faq_category->isEmpty()) {
             return response()->json([
                 'message' => 'Faq Category not Found',
