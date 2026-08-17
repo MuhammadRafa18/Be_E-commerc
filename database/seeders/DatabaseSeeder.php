@@ -21,17 +21,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $seeders = [
-          
-            UserSeeder::class,      
-            AddresSeeder::class,   
-            CategorySeeder::class,   
-            ProductSeeder::class,  
-            SkinTypeSeeder::class,
-            ShippingZoneSeeder::class,
-            ZoneSeeder::class,
-        ];
-
-        $this->call($seeders);
+        \App\Models\User::factory(10)->create();
+        \App\Models\Addres::factory(10)->create();
+        \App\Models\Category::factory(10)->create();
+        \App\Models\SkinType::factory(10)->create();
+        \App\Models\Product::factory(50)->create();
+        \App\Models\ShippingZone::factory(10)->create();
+        \App\Models\ZoneRegion::factory(10)->create();
     }
+    //     $seeders = [
+          
+    //         UserSeeder::class,      
+    //         AddresSeeder::class,   
+    //         CategorySeeder::class,   
+    //         SkinTypeSeeder::class,
+    //         ProductSeeder::class,  
+    //         ShippingZoneSeeder::class,
+    //         ZoneSeeder::class,
+    //     ];
+
+    //     $this->call($seeders);
+    // }
 }

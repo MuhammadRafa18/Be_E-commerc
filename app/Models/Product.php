@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 use App\Models\Category;
+use App\Observers\ProductObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;

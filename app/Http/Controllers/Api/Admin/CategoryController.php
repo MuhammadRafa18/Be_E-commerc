@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
@@ -15,8 +16,11 @@ class CategoryController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $category = Category::orderBy('created_at', 'desc')->paginate(10);
+    {   
+        $cacheKey = 'categories_page_' . request()->get('page', 1);
+        $category = Cache::remember($cacheKey, 3600, function () {
+            return Category::orderBy('created_at', 'desc')->paginate(10);
+        });
         if ($category->isEmpty()) {
             return response()->json(['message' => 'Category not Found'], 404);
         }

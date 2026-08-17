@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ShippingZone as ResourcesShippingZone;
 use App\Models\ShippingZone as ModelsShippingZone;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ShippingZone extends Controller
 {
     public function index()
     {
-        $shipping_zone = ModelsShippingZone::orderBy('created_at', 'desc')->paginate(10);
+        $cacheKey = 'shipping_zones_page_' . request()->get('page', 1);
+        $shipping_zone = Cache::remember($cacheKey, 3600, function () {
+            return ModelsShippingZone::orderBy('created_at', 'desc')->paginate(10);
+        });
         if ($shipping_zone->isEmpty()) {
             return response()->json([
                 'data' => "Shipping Zone Not Found"

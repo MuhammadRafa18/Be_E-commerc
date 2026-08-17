@@ -59,10 +59,10 @@ class OrderHandler implements OrderHandlerInterface
                 }
 
                 $subtotal += $item->product_sku->sell_price * $item->qty;
-                $diskon += ($item->product_sku->sell_price - $item->product_sku->price) * $item->qty;
+                $diskon += ($item->product_sku->price - $item->product_sku->sell_price) * $item->qty;
             }
 
-
+  
             $total = $subtotal + $ongkir;
 
 

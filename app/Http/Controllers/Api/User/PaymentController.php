@@ -24,6 +24,7 @@ class PaymentController extends Controller
     {
         $this->authorize('create', Payment::class);
         $user = $request->user();
+    
 
         $payment = $this->paymentService->checkout($user, $OrderId);
 

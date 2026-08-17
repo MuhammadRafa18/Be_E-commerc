@@ -9,6 +9,8 @@ use App\Http\Resources\ProductResource;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\Product\ProductService;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -22,19 +24,23 @@ class ProductController extends Controller
         $this->productService = $productService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-    
-        $product = Product::query()->with([
-            'category:id,category,slug,type',
-            'skin_type:id,type',
-            'product_sku:id,product_id,price,sell_price,stock,weight_gram',
-            'product_sku.skincare:id,product_sku_id,size,use_produk,ingredient',
-            'product_sku.attribute:id,product_sku_id,size,color',
+        $page = $request->get('page', 1);
+        $cacheKey = "products_page_{$page}";
 
-        ])
-            ->latest()
-            ->paginate(10);
+        $product = Cache::remember($cacheKey, 3600, function () {
+            return Product::query()->with([
+                'category:id,category,slug,type',
+                'skin_type:id,type',
+                'product_sku:id,product_id,price,sell_price,stock,weight_gram',
+                'product_sku.skincare:id,product_sku_id,size,use_produk,ingredient',
+                'product_sku.attribute:id,product_sku_id,size,color',
+
+            ])
+                ->latest()
+                ->paginate(10);
+        });
 
 
         if ($product->isEmpty()) {
@@ -65,29 +71,37 @@ class ProductController extends Controller
 
     public function show($slug)
     {
-       
-        $product =  Product::with([
-            'category:id,category,slug,type',
-            'skin_type:id,type',
-            'product_sku:id,product_id,price,sell_price,stock,weight_gram',
-            'product_sku.skincare:id,product_sku_id,size,use_produk,ingredient',
-            'product_sku.attribute:id,product_sku_id,size,color',
-        ])->where('slug', $slug)->firstOrFail();
+        $cacheKey = "product_slug_{$slug}";
+        $product = Cache::remember($cacheKey, 3600, function () use ($slug) {
+            return Product::with([
+                'category:id,category,slug,type',
+                'skin_type:id,type',
+                'product_sku:id,product_id,price,sell_price,stock,weight_gram',
+                'product_sku.skincare:id,product_sku_id,size,use_produk,ingredient',
+                'product_sku.attribute:id,product_sku_id,size,color',
+            ])->where('slug', $slug)->firstOrFail();
+        });
         return response()->json([
             'data' => new ProductResource($product)
         ], 200);
     }
-    
+
     public function showwithId($id)
     {
-       
-        $product =  Product::with([
-            'category:id,category,slug,type',
-            'skin_type:id,type',
-            'product_sku:id,product_id,price,sell_price,stock,weight_gram',
-            'product_sku.skincare:id,product_sku_id,size,use_produk,ingredient',
-            'product_sku.attribute:id,product_sku_id,size,color',
-        ])->where('id', $id)->firstOrFail();
+
+
+        $cacheKey = "product_id_{$id}";
+
+        $product = Cache::remember($cacheKey, 3600, function () use ($id) {
+            return Product::with([
+                'category:id,category,slug,type',
+                'skin_type:id,type',
+                'product_sku:id,product_id,price,sell_price,stock,weight_gram',
+                'product_sku.skincare:id,product_sku_id,size,use_produk,ingredient',
+                'product_sku.attribute:id,product_sku_id,size,color',
+            ])->where('id', $id)->firstOrFail();
+        });
+
         return response()->json([
             'data' => new ProductResource($product)
         ], 200);

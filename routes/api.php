@@ -26,7 +26,9 @@ use App\Http\Controllers\Api\User\CartController;
 use App\Http\Controllers\Api\User\ContactController;
 use App\Http\Controllers\Api\User\PaymentController;
 use App\Http\Controllers\Api\User\VisitorController;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 
@@ -72,6 +74,7 @@ Route::get('/phone/verify/{token}', [PhoneVertivication::class, 'verify']);
 Route::post('register', [AdminDataUser::class, 'register']);
 // Produk
 Route::get('product', [ProductController::class, 'index']);
+
 Route::post('product/{slug}', [ProductController::class, 'show']);
 Route::post('product/show/{id}', [ProductController::class, 'showwithId']);
 // Faq Category
@@ -99,9 +102,9 @@ Route::get('result', [AdminResult::class, 'index']);
 //  Logout
 Route::middleware('auth:sanctum')->group(function () {
     //  Logout  User
-    Route::post('logout', [AuthDataUserController::class, 'logout'])->middleware('auth:sanctum');
+    Route::post('logout', [AuthDataUserController::class, 'logout']);
     // Logout Admin
-    Route::post('logoutAdmin', [AuthUserAdmin::class, 'logout'])->middleware('auth:sanctum');
+    Route::post('logoutAdmin', [AuthUserAdmin::class, 'logout']);
 });
 
 
@@ -239,7 +242,6 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
 
 //  Hak Ases Super Admin  
 Route::middleware(['auth:sanctum', 'role:super_admin'])
-    ->prefix('admin')
     ->group(function () {
         Route::post('/UserAdmin', [UserAdmin::class, 'store']);
         Route::delete('/UserAdmin/{UserAdmin}', [UserAdmin::class, 'destroy']);

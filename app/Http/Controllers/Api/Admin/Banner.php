@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Resources\BannerResource;
 use App\Models\Banner as ModelsBanner;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,7 +18,10 @@ class Banner extends Controller
      */
     public function index()
     {
-        $Banner = ModelsBanner::orderBy('created_at','desc')->paginate(10);
+        $cacheKey = 'banners_page_' . request()->get('page', 1);
+        $Banner = Cache::remember($cacheKey, 3600, function () {
+            return ModelsBanner::orderBy('created_at', 'desc')->paginate(10);
+        });
         if ($Banner->isEmpty()) {
           return response()->json(['message' => 'Banner not Found'], 404);
         } 
@@ -33,7 +37,8 @@ class Banner extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
+    {   
+        
         $validasi = Validator::make($request->all(), [
             'banner' => 'required|image|max:2048',
         ]);
