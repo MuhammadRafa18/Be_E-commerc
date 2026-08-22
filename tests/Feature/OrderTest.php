@@ -71,7 +71,7 @@ class OrderTest extends TestCase
             'qty' => 2,
         ]);
 
-        $response = $this->postJson('/api/order', [
+        $response = $this->postJson('/api/orders', [
             'address_id' => $address->id,
             'zones_region_id' => $region->id,
         ]);
@@ -115,7 +115,7 @@ class OrderTest extends TestCase
             'shipping_zone_id' => $shipping->id,
         ]);
 
-        $response = $this->postJson('/api/order', [
+        $response = $this->postJson('/api/orders', [
             'address_id' => $address->id,
             'zones_region_id' => $region->id,
         ]);
@@ -142,7 +142,7 @@ class OrderTest extends TestCase
             'shipping_zone_id' => $shipping->id,
         ]);
 
-        $response = $this->postJson('/api/order', [
+        $response = $this->postJson('/api/orders', [
             'address_id' => $address->id,
             'zones_region_id' => $region->id,
         ]);
@@ -171,7 +171,7 @@ class OrderTest extends TestCase
             'shipping_zone_id' => $shipping->id,
         ]);
 
-        $response = $this->postJson('/api/order', [
+        $response = $this->postJson('/api/orders', [
             'address_id' => $address->id,
             'zones_region_id' => $region->id,
         ]);
@@ -192,7 +192,7 @@ class OrderTest extends TestCase
             'user_id' => $user->id
         ]);
 
-        $response = $this->postJson('/api/order', [
+        $response = $this->postJson('/api/orders', [
             'address_id' => $address->id,
             'zones_region_id' => 999
         ]);
@@ -243,7 +243,7 @@ class OrderTest extends TestCase
             'is_selected' => true,
         ]);
 
-        $response = $this->postJson('/api/order', [
+        $response = $this->postJson('/api/orders', [
             'address_id' => $address->id,
             'zones_region_id' => $region->id,
         ]);
@@ -264,7 +264,7 @@ class OrderTest extends TestCase
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
-            ->postJson("/api/order/{$order->id}");
+            ->postJson("/api/orders/{$order->id}");
 
         $response->assertOk();
 
@@ -282,7 +282,7 @@ class OrderTest extends TestCase
             'user_id' => $other->id,
         ]);
 
-        $this->postJson("/api/order/{$order->id}")
+        $this->postJson("/api/orders/{$order->id}")
               ->assertForbidden();
     }
     public function test_user_can_cancel_pending_order()
@@ -296,7 +296,7 @@ class OrderTest extends TestCase
             'status' => 'Pending',
         ]);
 
-        $response = $this->patchJson("/api/order/cancel/{$order->id}");
+        $response = $this->patchJson("/api/orders/{$order->id}/cancel");
 
         $response->assertOk();
 
@@ -316,7 +316,7 @@ class OrderTest extends TestCase
             'status' => 'Paid'
         ]);
 
-        $this->patchJson("/api/order/cancel/{$order->id}")
+        $this->patchJson("/api/orders/{$order->id}")
             ->assertForbidden();
 
         $this->assertDatabaseHas('orders', [
@@ -334,7 +334,7 @@ class OrderTest extends TestCase
             'status' => 'Paid'
         ]);
 
-        $response = $this->patchJson("/api/admin/order/{$order->id}", [
+        $response = $this->patchJson("/api/admin/orders/{$order->id}", [
             'status' => 'Diproses'
         ]);
 
@@ -355,7 +355,7 @@ class OrderTest extends TestCase
             'status' => 'Diproses'
         ]);
 
-        $response = $this->patchJson("/api/admin/order/{$order->id}", [
+        $response = $this->patchJson("/api/admin/orders/{$order->id}", [
             'status' => 'Dikirim',
             'trackingNumber' => 'JNE123456789'
         ]);
@@ -382,7 +382,7 @@ class OrderTest extends TestCase
             'status' => 'Diproses'
         ]);
 
-        $response = $this->patchJson("/api/admin/order/{$order->id}", [
+        $response = $this->patchJson("/api/admin/orders/{$order->id}", [
             'status' => 'Dikirim',
             'trackingNumber' => 'JNE123456789'
         ]);

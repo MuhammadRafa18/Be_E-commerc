@@ -26,29 +26,7 @@ class OrderCompletionService
                 throw new \Exception('Order belum bisa diselesaikan');
             }
 
-            if ($order->stock_reduced_at === null) {
-                foreach ($order->order_item as $item) {
-
-                    $sku = $item->product_sku()
-                        ->lockForUpdate()
-                        ->first();
-
-                    if (!$sku) {
-                        throw new \Exception('SKU produk tidak ditemukan');
-                    }
-
-                    if ($sku->stock < $item->qty) {
-                        throw new \Exception("Stok produk {$item->product_title} tidak cukup");
-                    }
-
-                    $sku->decrement('stock', $item->qty);
-                    $sku->deactivateIfStockOut();
-                }
-
-                $order->update([
-                    'stock_reduced_at' => now(),
-                ]);
-            }
+        
 
 
             $order->update([

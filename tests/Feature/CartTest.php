@@ -126,8 +126,8 @@ class CartTest extends TestCase
         ]);
         Sanctum::actingAs($user);
 
-        $response = $this->postJson("/api/cart/selected/{$cart->id}");
-
+        $response = $this->postJson("/api/cart/{$cart->id}/selected");
+      
         $response->assertOk()
             ->assertJsonPath('is_selected', false);
         $this->assertDatabaseHas('carts', [
@@ -163,7 +163,7 @@ class CartTest extends TestCase
         ]);
         Sanctum::actingAs($user);
 
-        $response = $this->deleteJson("/api/cart/delete/{$cart->id}");
+        $response = $this->deleteJson("/api/cart/{$cart->id}");
 
         $response->assertOk();
         $this->assertDatabaseMissing('carts', [

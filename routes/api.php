@@ -50,7 +50,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //  Hak Ases Guest
 // Auth
 Route::prefix('auth')->group(function () {
-    Route::post('loginAdmin', [AuthUserAdmin::class, 'login']);
+    Route::post('admin/login', [AuthUserAdmin::class, 'login']);
     Route::post('login', [AuthDataUserController::class, 'login']);
     //  login with google
     Route::get('/google', [GoogleAuthController::class, 'redirect']);
@@ -72,53 +72,58 @@ Route::get('/phone/verify/{token}', [PhoneVertivication::class, 'verify']);
 
 // Register
 Route::post('register', [AdminDataUser::class, 'register']);
-// Produk
-Route::get('product', [ProductController::class, 'index']);
+// Products
+Route::apiResource('products', ProductController::class)
+    ->only(['index', 'show','showwithId']);
 
-Route::post('product/{slug}', [ProductController::class, 'show']);
-Route::post('product/show/{id}', [ProductController::class, 'showwithId']);
 // Faq Category
-Route::get('Faq_category', [Faq_category::class, 'index']);
+Route::apiResource('faq-categories', Faq_category::class)
+    ->only(['index']);
 // Visitor
 Route::post('/visitor', [VisitorController::class, 'store']);
 // CATEGORY
-Route::get('category', [AdminCategoryController::class, 'index']);
+Route::apiResource('category', AdminCategoryController::class)
+    ->only('index');
+    
 
 // SKIN TYPE
-Route::get('SkinTypes', [SkinTypes::class, 'index']);
-Route::post('SkinTypes/{slug}', [SkinTypes::class, 'show']);
+Route::apiResource('skin-types', SkinTypes::class)
+    ->only(['index', 'show']);
 // Banner
-Route::get('banner', [AdminBanner::class, 'index']);
-Route::get('banner/{Banner}', [AdminBanner::class, 'show']);
+Route::apiResource('banners', AdminBanner::class)
+    ->only(['index', 'show']);
+
 //About
-Route::post('about/{slug}', [About::class, 'show']);
+Route::apiResource('about', About::class)
+    ->only('show');
 // Detail Faq
-Route::get('DetailFaq', [DetailFaq::class, 'index']);
-Route::post('DetailFaq/{slug}', [DetailFaq::class, 'show']);
+Route::apiResource('detail-faq', DetailFaq::class)
+    ->only(['index', 'show']);
 // Contact
-Route::post('Contact',[ContactController::class,'store']);
+Route::apiResource('contacts', ContactController::class)
+    ->only('store');
 // Result
-Route::get('result', [AdminResult::class, 'index']);
+
+Route::apiResource('result', AdminResult::class)
+    ->only('index');
 //  Logout
 Route::middleware('auth:sanctum')->group(function () {
     //  Logout  User
     Route::post('logout', [AuthDataUserController::class, 'logout']);
     // Logout Admin
-    Route::post('logoutAdmin', [AuthUserAdmin::class, 'logout']);
+    Route::post('admin/logout', [AuthUserAdmin::class, 'logout']);
 });
 
 
 //  Hak Ases User
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     //  Addres
-    Route::apiResource('addres', AddresController::class);
+    Route::apiResource('addresses', AddresController::class);
 
     // Order
-    Route::get('order', [OrderController::class, 'user']);
-    Route::post('order', [OrderController::class, 'checkout']);
-    Route::post('order/{order}', [OrderController::class, 'show']);
-    Route::post('/order/{order}/confirm-done', [OrderController::class, 'confirmDone']);
-    Route::patch('order/cancel/{order}', [OrderController::class, 'destroy']);
+    Route::apiResource('orders', OrderController::class)
+        ->only(['checkout', 'show','user','destroy']);
+    Route::post('/orders/{order}/confirm-done', [OrderController::class, 'confirmDone']);
 
 
     //  User
@@ -128,14 +133,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::delete('user/delete', [AdminDataUser::class, 'destroy']);
 
     // Favorite
-    Route::get('favorite', [FavoriteController::class, 'index']);
+    Route::apiResource('favorite', FavoriteController::class)
+        ->only(['index']);
     Route::post('favorite', [FavoriteController::class, 'toggleOn']);
 
     // Cart
-    Route::get('cart', [CartController::class, 'index']);
-    Route::post('cart', [CartController::class, 'store']);
-    Route::delete('cart/delete/{id}', [CartController::class, 'destroy']);
-    Route::post('cart/selected/{id}', [CartController::class, 'select'])->middleware('throttle:20,1');
+    Route::apiResource('cart', CartController::class)
+        ->only(['index', 'store', 'destroy']);
+    Route::post('cart/{cart}/selected', [CartController::class, 'select'])->middleware('throttle:20,1');
     
 
     // Verif Phone
@@ -152,73 +157,54 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
     ->group(function () {   
 
         // Category
-        Route::get('category/{category}', [AdminCategoryController::class, 'show']);
-        Route::post('category', [AdminCategoryController::class, 'store']);
-        Route::put('category/{category}', [AdminCategoryController::class, 'update']);
-        Route::patch('category/{category}', [AdminCategoryController::class, 'update']);
-        Route::delete('category/{category}', [AdminCategoryController::class, 'destroy']);
+        Route::apiResource('category', AdminCategoryController::class)
+            ->only(['index', 'show', 'store', 'update', 'destroy']);
 
         // Order
-        Route::get('order', [OrderController::class, 'index']);
-        Route::put('order/{order}', [OrderController::class, 'update']);
-        Route::patch('order/{order}', [OrderController::class, 'update']);
+        Route::apiResource('orders', OrderController::class)
+            ->only(['index', 'update',]);
+      
 
 
         // Produk
-        Route::post('product', [ProductController::class, 'store']);
-        Route::put('product/{product}', [ProductController::class, 'update']);
-        Route::patch('product/{product}', [ProductController::class, 'update']);
-        Route::delete('product/{product}', [ProductController::class, 'destroy']);
+           Route::apiResource('products', ProductController::class)
+            ->only(['store', 'update', 'destroy']);
+    
 
         //Banner
-        Route::post('banner', [AdminBanner::class, 'store']);
-        Route::put('banner/{Banner}', [AdminBanner::class, 'update']);
-        Route::patch('banner/{Banner}', [AdminBanner::class, 'update']);
-        Route::delete('banner/{Banner}', [AdminBanner::class, 'destroy']);
+          Route::apiResource('banners', AdminBanner::class)
+            ->only(['store', 'update', 'destroy']);
         // Produk Skin Type
-        Route::post('SkinTypes', [SkinTypes::class, 'store']);
-        Route::put('SkinTypes/{Skin_type}', [SkinTypes::class, 'update']);
-        Route::patch('SkinTypes/{Skin_type}', [SkinTypes::class, 'update']);
-        Route::delete('SkinTypes/{Skin_type}', [SkinTypes::class, 'destroy']);
+         Route::apiResource('skin-types', SkinTypes::class)
+            ->only(['store', 'update', 'destroy']);
+
 
         // Result
-        Route::get('result/{result}', [AdminResult::class, 'show']);
-        Route::post('result', [AdminResult::class, 'store']);
-        Route::put('result/{result}', [AdminResult::class, 'update']);
-        Route::delete('result/{result}', [AdminResult::class, 'destroy']);
-
+        Route::apiResource('result', AdminResult::class)
+            ->only([ 'show', 'store', 'update', 'destroy']);
+      
         // About
-        Route::get('about', [About::class, 'index']);
-        Route::post('about', [About::class, 'store']);
-        Route::put('about/{about}', [About::class, 'update']);
-        Route::patch('about/{about}', [About::class, 'update']);
-        Route::delete('about/{about}', [About::class, 'destroy']);
+        Route::apiResource('about', About::class)
+            ->only(['index', 'store', 'update', 'destroy']);
 
         // Faq Category
-        Route::get('Faq_category/{Faq_category}', [Faq_category::class, 'show']);
-        Route::post('Faq_category', [Faq_category::class, 'store']);
-        Route::put('Faq_category/{Faq_category}', [Faq_category::class, 'update']);
-        Route::patch('Faq_category/{Faq_category}', [Faq_category::class, 'update']);
-        Route::delete('Faq_category/{Faq_category}', [Faq_category::class, 'destroy']);
+        Route::apiResource('faq-categories', Faq_category::class);
 
         // Detail Faq
-        Route::post('DetailFaq', [DetailFaq::class, 'store']);
-        Route::put('DetailFaq/{detail_faq}', [DetailFaq::class, 'update']);
-        Route::patch('DetailFaq/{detail_faq}', [DetailFaq::class, 'update']);
-        Route::delete('DetailFaq/{detail_faq}', [DetailFaq::class, 'destroy']);
+        Route::apiResource('faq-details', DetailFaq::class)
+            ->only(['store', 'update', 'destroy']);
 
         // Contact
-        Route::get('Contact', [ContactController::class, 'index']);
-        Route::get('Contact/{contact}', [ContactController::class, 'show']);
-        Route::delete('Contact/{contact}', [ContactController::class, 'destroy']);
+        Route::apiResource('contacts', ContactController::class)
+            ->only(['index', 'show', 'destroy']);
 
         // User 
          Route::get('me', [UserAdmin::class, 'me']);
-         Route::get('/UserAdmin', [UserAdmin::class, 'index']);
-         Route::put('/UserAdmin/{UserAdmin}', [UserAdmin::class, 'update']);
-         Route::patch('/UserAdmin/{UserAdmin}', [UserAdmin::class, 'update']);
+         Route::apiResource('users', UserAdmin::class)
+            ->only(['index', 'update']);
         // User Client
-        Route::get('DataUser', [AdminDataUser::class, 'index']);
+        Route::apiResource('DataUser', AdminDataUser::class)
+            ->only(['index']);
         //  Shipping Zone
         Route::apiResource('shippingZone',ShippingZone::class);
         // Zone Region
@@ -226,15 +212,15 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
         // visitor
         Route::get('/visitor', [DashboardController::class, 'indexVisit']);
         // cart top catgeory
-        Route::get('/top-categories', [DashboardController::class, 'getTopCategories']);
+        Route::get('/admin/dashboard/top-categories', [DashboardController::class, 'getTopCategories']);
         // card order
-        Route::get('/countOrder', [DashboardController::class, 'countOrder']);
+        Route::get('/admin/dashboard/orders/count', [DashboardController::class, 'countOrder']);
          // card User
-        Route::get('/countUser', [DashboardController::class, 'countUser']);
+        Route::get('/admin/dashboard/users/count', [DashboardController::class, 'countUser']);
          // card Transaksi
-        Route::get('/countPayment', [DashboardController::class, 'countPayment']);
+        Route::get('/admin/dashboard/payments/count', [DashboardController::class, 'countPayment']);
         // Card Low Stcok
-        Route::get('/lowStock', [DashboardController::class, 'lowStock']);
+        Route::get('/admin/dashboard/low-stock', [DashboardController::class, 'lowStock']);
 
     });
 
@@ -243,6 +229,6 @@ Route::middleware(['auth:sanctum', 'role:admin|super_admin'])
 //  Hak Ases Super Admin  
 Route::middleware(['auth:sanctum', 'role:super_admin'])
     ->group(function () {
-        Route::post('/UserAdmin', [UserAdmin::class, 'store']);
-        Route::delete('/UserAdmin/{UserAdmin}', [UserAdmin::class, 'destroy']);
+        route::apiResource('users', UserAdmin::class)
+            ->only(['store', 'destroy']);
     });

@@ -20,7 +20,7 @@ class AddressTest extends TestCase
         Addres::factory()->create(['user_id' => $otherUser->id]);
         Sanctum::actingAs($user);
 
-        $response = $this->getJson('/api/addres');
+        $response = $this->getJson('/api/addresses');
 
         $response->assertOk()
             ->assertJsonCount(1, 'data')
@@ -32,7 +32,7 @@ class AddressTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $response = $this->postJson('/api/addres', $this->addressPayload());
+        $response = $this->postJson('/api/addresses', $this->addressPayload());
 
         $response->assertCreated();
         $this->assertDatabaseHas('addres', [
@@ -48,7 +48,7 @@ class AddressTest extends TestCase
         Addres::factory()->count(3)->create(['user_id' => $user->id]);
         Sanctum::actingAs($user);
 
-        $response = $this->postJson('/api/addres', $this->addressPayload());
+        $response = $this->postJson('/api/addresses', $this->addressPayload());
 
         $response->assertStatus(422)
             ->assertJsonPath('errors.address.0', 'Maksimal 3 alamat');
@@ -61,7 +61,7 @@ class AddressTest extends TestCase
         $address = Addres::factory()->create(['user_id' => $user->id]);
         Sanctum::actingAs($user);
 
-        $response = $this->getJson("/api/addres/{$address->id}");
+        $response = $this->getJson("/api/addresses/{$address->id}");
 
         $response->assertOk()
             ->assertJsonPath('data.id', $address->id);
@@ -73,7 +73,7 @@ class AddressTest extends TestCase
         $otherAddress = Addres::factory()->create();
         Sanctum::actingAs($user);
 
-        $response = $this->getJson("/api/addres/{$otherAddress->id}");
+        $response = $this->getJson("/api/addresses/{$otherAddress->id}");
 
         $response->assertNotFound();
     }
@@ -84,7 +84,7 @@ class AddressTest extends TestCase
         $address = Addres::factory()->create(['user_id' => $user->id]);
         Sanctum::actingAs($user);
 
-        $response = $this->patchJson("/api/addres/{$address->id}", [
+        $response = $this->patchJson("/api/addresses/{$address->id}", [
             'city' => 'Jakarta',
             'place' => 'Kantor',
         ]);
@@ -103,7 +103,7 @@ class AddressTest extends TestCase
         $otherAddress = Addres::factory()->create();
         Sanctum::actingAs($user);
 
-        $response = $this->patchJson("/api/addres/{$otherAddress->id}", [
+        $response = $this->patchJson("/api/addresses/{$otherAddress->id}", [
             'city' => 'Jakarta',
         ]);
 
@@ -120,7 +120,7 @@ class AddressTest extends TestCase
         $address = Addres::factory()->create(['user_id' => $user->id]);
         Sanctum::actingAs($user);
 
-        $response = $this->deleteJson("/api/addres/{$address->id}");
+        $response = $this->deleteJson("/api/addresses/{$address->id}");
 
         $response->assertOk();
         $this->assertDatabaseMissing('addres', [

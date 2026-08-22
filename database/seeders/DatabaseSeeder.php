@@ -25,7 +25,10 @@ class DatabaseSeeder extends Seeder
         \App\Models\Addres::factory(10)->create();
         \App\Models\Category::factory(10)->create();
         \App\Models\SkinType::factory(10)->create();
-        \App\Models\Product::factory(50)->create();
+        \App\Models\Product::factory(20)->create();
+        \App\Models\ProductSku::factory(20)->create();
+        \App\Models\ProductFashion::factory(10)->create();
+        \App\Models\ProductSkincare::factory(10)->create();
         \App\Models\ShippingZone::factory(10)->create();
         \App\Models\ZoneRegion::factory(10)->create();
     }

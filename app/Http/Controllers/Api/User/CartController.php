@@ -41,14 +41,6 @@ class CartController extends Controller
         try {
             $cart = $service->addToCart($request->validated(), $user);
             $cart->refresh();
-
-
-            $cart->load([
-                'product',
-                'product_sku',
-                'product_fashion',
-                'product_skincare'
-            ]);
             return response()->json([
                 'message' => 'Cart berhasil ditambah',
                 'data' => new ResourcesCart($cart),
