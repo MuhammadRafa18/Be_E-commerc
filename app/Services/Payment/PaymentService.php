@@ -5,6 +5,7 @@ namespace App\Services\Payment;
 use App\Mail\NewOrderNotification;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\ProductSku;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -76,7 +77,7 @@ class PaymentService
       $serverKey = config('Midtrans.server_key');
 
 
-      Log::info('MIDTRANS CALLBACK', $payload);
+
       $signature = hash(
          'sha512',
          $payload['order_id'] .
@@ -96,6 +97,7 @@ class PaymentService
 
          $payment = Payment::where('midtrans_order_id', $payload['order_id'])
             ->with('order.zones_region')
+            ->lockForUpdate()
             ->firstOrFail();
 
 
@@ -117,7 +119,7 @@ class PaymentService
             'payload' => $payload
          ]);
 
-         $order = $payment->order;
+         $order = Order::where('id', $payment->order_id)->with('order_item')->lockForUpdate()->firstOrFail();
 
          if (in_array($transactionStatus, ['capture', 'settlement'])) {
             if ($order->status === 'Paid') {
@@ -130,6 +132,32 @@ class PaymentService
                'estimated_delivery_min' => now()->addDays($order->zones_region->estimasi_min_day),
                'estimated_delivery_max' => now()->addDays($order->zones_region->estimasi_max_day),
             ]);
+
+            if ($order->stock_reduced_at === null) {
+               foreach ($order->order_item as $item) {
+
+                  $sku = ProductSku::where('id', $item->product_sku_id)
+                     ->lockForUpdate()
+                     ->first();
+
+                  if (!$sku) {
+                     throw new \Exception('SKU produk tidak ditemukan');
+                  }
+
+                  if ($sku->stock < $item->qty) {
+                     throw new \Exception("Stok produk {$item->product_title} tidak cukup");
+                  }
+
+                  $sku->decrement('stock', $item->qty);
+                  $sku->deactivateIfStockOut();
+               }
+
+               $order->update([
+                  'stock_reduced_at' => now(),
+               ]);
+            }
+
+
             DB::afterCommit(function () use ($order) {
                Mail::to('arlivacosmetics@gmail.com')
                   ->queue(new NewOrderNotification($order));
